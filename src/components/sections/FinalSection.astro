@@ -1,13 +1,102 @@
-<section class="final-section">
-  <div class="final-signal" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
-  <p class="eyebrow">Archive remains open</p>
-  <h2>THE TRANSMISSION<br />IS STILL ACTIVE</h2>
-  <button type="button" class="signal-cta" data-recall-signal>
-    <span>Listen to the signal</span>
-    <i aria-hidden="true"></i>
-  </button>
+<section class="final-section" data-archive-section="final" data-final-signal>
+  <picture class="final-section__image" aria-hidden="true">
+    <source media="(max-width: 767px)" srcset="/sequences/the-last-signal/mobile/frame-0760.webp" />
+    <img src="/sequences/the-last-signal/desktop/frame-0760.webp" alt="" loading="lazy" decoding="async" />
+  </picture>
+  <div class="final-section__treatment"></div>
+
+  <div class="final-status final-status--left" aria-hidden="true">
+    <span>ARCHIVE NODE / 04</span><span>OPERATOR / NONE</span><span>LINK / ACTIVE</span>
+  </div>
+  <div class="final-status final-status--right" aria-hidden="true">
+    <span>FREQUENCY / 4.721</span><span>RECEIVERS / 002</span><span>ORIGIN / INTERNAL</span>
+  </div>
+
+  <div class="final-instrument" aria-hidden="true">
+    <svg viewBox="0 0 640 640">
+      <circle class="final-ring final-ring--outer" cx="320" cy="320" r="286"></circle>
+      <circle class="final-ring final-ring--middle" cx="320" cy="320" r="216"></circle>
+      <circle class="final-ring final-ring--inner" cx="320" cy="320" r="116"></circle>
+      <circle class="final-ring final-ring--pulse" cx="320" cy="320" r="72"></circle>
+      <path class="final-crosshair" d="M320 14V120M320 520V626M14 320H120M520 320H626"></path>
+      <polyline class="final-wave" points="74,320 146,320 170,300 194,340 220,320 252,320 270,268 287,374 305,292 320,348 337,292 354,374 372,268 390,320 420,320 446,302 470,338 494,320 566,320"></polyline>
+      <circle class="final-core" cx="320" cy="320" r="5"></circle>
+    </svg>
+  </div>
+
+  <div class="final-section__content" data-reveal>
+    <p class="instrument-label"><i></i> Archive remains open</p>
+    <h2>The transmission<br />is still active</h2>
+    <p class="final-section__lead">The station is empty. The receiver count is not.</p>
+
+    <button type="button" class="signal-cta" data-recall-signal>
+      <span>Reopen final feed</span>
+      <i aria-hidden="true"></i>
+    </button>
+
+    <div class="final-response" aria-live="polite" data-final-response>Standing by for operator input</div>
+  </div>
+
+  <div class="receiver-count" data-reveal>
+    <div><span>Authorized operators</span><strong>000</strong></div>
+    <div><span>Active receivers</span><strong>002</strong></div>
+  </div>
+
   <footer>
     <span>THE LAST SIGNAL / 2026</span>
     <span>A FICTIONAL INTERACTIVE EXPERIENCE</span>
   </footer>
 </section>
+
+<style>
+  .final-section { position: relative; min-height: 112svh; padding: 9rem var(--page-pad) 2rem; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; border-top: 1px solid var(--archive-line); background: var(--archive-bg); text-align: center; }
+  .final-section__image, .final-section__image img, .final-section__treatment { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .final-section__image { opacity: 0.19; }
+  .final-section__image img { object-fit: cover; filter: grayscale(0.5) saturate(0.48) contrast(1.2); }
+  .final-section__treatment { background: radial-gradient(circle at 50% 52%, rgba(7, 9, 11, 0.24), var(--archive-bg) 64%), linear-gradient(180deg, var(--archive-bg), transparent 25%, transparent 72%, var(--archive-bg)); }
+  .final-instrument { position: absolute; left: 50%; top: 49%; width: min(46rem, 72vw); aspect-ratio: 1; transform: translate(-50%, -50%); opacity: 0.64; }
+  .final-instrument svg { width: 100%; height: 100%; overflow: visible; }
+  .final-ring { fill: none; stroke: rgba(113, 187, 192, 0.24); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .final-ring--middle { stroke-dasharray: 2 7; }
+  .final-ring--inner { stroke: rgba(216, 224, 224, 0.24); }
+  .final-ring--pulse { stroke: var(--archive-red); opacity: 0.48; transform-origin: 320px 320px; animation: final-pulse 4s ease-out infinite; }
+  .final-crosshair { fill: none; stroke: rgba(113, 187, 192, 0.28); stroke-width: 1; }
+  .final-wave { fill: none; stroke: rgba(216, 224, 224, 0.82); stroke-width: 1.4; stroke-dasharray: 18 4; vector-effect: non-scaling-stroke; filter: drop-shadow(0 0 8px rgba(113, 187, 192, 0.5)); animation: final-wave-live 2.8s linear infinite; }
+  .final-core { fill: var(--archive-red); filter: drop-shadow(0 0 12px var(--archive-red)); }
+  .final-section__content { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; }
+  .final-section__content .instrument-label { color: var(--archive-cyan); }
+  .final-section__content .instrument-label i { background: var(--archive-red); box-shadow: 0 0 1rem var(--archive-red); }
+  .final-section h2 { margin: 2rem 0 0; font: 500 6.75rem/0.88 var(--archive-display); text-transform: uppercase; }
+  .final-section__lead { margin: 2rem 0 0; color: var(--archive-muted); font-size: 1rem; line-height: 1.5; }
+  .signal-cta { position: relative; display: flex; align-items: center; gap: 1.5rem; margin-top: 3.5rem; padding: 1rem 0; border: 0; border-bottom: 1px solid var(--archive-text); background: transparent; color: var(--archive-text); cursor: pointer; font: 600 0.72rem/1 var(--archive-mono); text-transform: uppercase; }
+  .signal-cta i { width: 0.55rem; height: 0.55rem; border-radius: 50%; background: var(--archive-red); box-shadow: 0 0 1.2rem rgba(214, 75, 65, 0.75); transition: transform 200ms ease; }
+  .signal-cta:hover i, .signal-cta:focus-visible i { transform: scale(1.7); }
+  .final-response { min-height: 1rem; margin-top: 1.25rem; color: var(--archive-muted); font: 400 0.58rem/1 var(--archive-mono); text-transform: uppercase; }
+  .receiver-count { position: absolute; z-index: 2; left: var(--page-pad); right: var(--page-pad); bottom: 6rem; display: flex; justify-content: center; gap: 1px; }
+  .receiver-count > div { width: 13rem; min-height: 4.5rem; padding: 0.9rem 1rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border: 1px solid var(--archive-line-strong); background: rgba(7, 9, 11, 0.64); }
+  .receiver-count span { color: var(--archive-muted); font: 400 0.56rem/1.3 var(--archive-mono); text-align: left; text-transform: uppercase; }
+  .receiver-count strong { font: 500 1.5rem/1 var(--archive-mono); }
+  .receiver-count > div:last-child strong { color: var(--archive-red); }
+  .final-status { position: absolute; z-index: 2; top: 2rem; display: grid; gap: 0.45rem; color: var(--archive-muted); font: 400 0.56rem/1 var(--archive-mono); }
+  .final-status--left { left: var(--page-pad); text-align: left; }.final-status--right { right: var(--page-pad); text-align: right; }
+  .final-section footer { position: absolute; z-index: 2; left: var(--page-pad); right: var(--page-pad); bottom: 2rem; display: flex; justify-content: space-between; color: var(--archive-muted); font: 500 0.58rem/1 var(--archive-mono); }
+  .final-section.is-transmitting .final-ring--pulse { animation-duration: 0.55s; }
+  .final-section.is-transmitting .final-wave { stroke: var(--archive-red); }
+  @keyframes final-pulse { 0% { opacity: 0.75; transform: scale(0.55); } 74%, 100% { opacity: 0; transform: scale(2.7); } }
+  @keyframes final-wave-live { to { stroke-dashoffset: -88; } }
+
+  @media (max-width: 1000px) {
+    .final-section h2 { font-size: 5rem; }
+  }
+  @media (max-width: 767px) {
+    .final-section { min-height: 100svh; padding-bottom: 8rem; }
+    .final-instrument { width: 120vw; opacity: 0.48; }
+    .final-section h2 { font-size: 3.15rem; line-height: 0.92; }
+    .final-section__lead { max-width: 18rem; }
+    .final-status--right { display: none; }
+    .receiver-count { bottom: 5.5rem; }
+    .receiver-count > div { width: 50%; }
+    .final-section footer { gap: 1rem; line-height: 1.35; text-align: left; }
+    .final-section footer span:last-child { text-align: right; }
+  }
+</style>

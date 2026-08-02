@@ -1,19 +1,166 @@
-<section class="location-section section-band">
-  <div class="section-index"><span>07</span><span>LOCATION</span></div>
-  <div class="location-diagram" aria-hidden="true">
-    <span class="contour contour--one"></span>
-    <span class="contour contour--two"></span>
-    <span class="contour contour--three"></span>
-    <span class="location-point"><i></i></span>
-    <span class="axis axis--x"></span>
-    <span class="axis axis--y"></span>
-  </div>
-  <div class="location-copy">
-    <p class="eyebrow">Fictional coordinates / Sector 12</p>
-    <h2>46° 12' 09&quot; N<br />78° 44' 31&quot; E</h2>
-    <dl>
-      <div><dt>Altitude</dt><dd>4,280 M</dd></div>
-      <div><dt>Access</dt><dd>Restricted</dd></div>
-    </dl>
+<section class="location-section section-band" data-archive-section="location" data-map-mode="topo">
+  <div class="section-index"><span>07</span><span>LOCATION / SECTOR 12</span></div>
+
+  <header class="section-heading location-section__heading" data-reveal>
+    <p class="eyebrow">Triangulation result / Confidence 99.4%</p>
+    <h2>Every bearing returned<br /><em>to the station.</em></h2>
+  </header>
+
+  <div class="location-workspace">
+    <div class="sector-map" data-reveal>
+      <div class="instrument-bar sector-map__bar">
+        <div>
+          <span class="instrument-label">Terrain array</span>
+          <strong>GRID 46N / 78E</strong>
+        </div>
+        <div class="mode-switch" role="group" aria-label="Map display mode">
+          <button type="button" data-map-mode-control="topo" aria-pressed="true">Topo</button>
+          <button type="button" data-map-mode-control="range" aria-pressed="false">Range</button>
+          <button type="button" data-map-mode-control="thermal" aria-pressed="false">Thermal</button>
+        </div>
+      </div>
+
+      <div class="sector-map__screen">
+        <svg viewBox="0 0 800 800" role="img" aria-label="Fictional topographic display of Sector 12">
+          <defs>
+            <pattern id="sector-grid-small" width="50" height="50" patternUnits="userSpaceOnUse">
+              <path d="M 50 0 L 0 0 0 50" fill="none" stroke="currentColor" stroke-width="1"></path>
+            </pattern>
+            <pattern id="sector-grid-large" width="200" height="200" patternUnits="userSpaceOnUse">
+              <rect width="200" height="200" fill="url(#sector-grid-small)"></rect>
+              <path d="M 200 0 L 0 0 0 200" fill="none" stroke="currentColor" stroke-width="2"></path>
+            </pattern>
+            <radialGradient id="thermal-halo">
+              <stop offset="0" stop-color="#d64b41" stop-opacity="0.8"></stop>
+              <stop offset="0.3" stop-color="#c9a258" stop-opacity="0.35"></stop>
+              <stop offset="1" stop-color="#c9a258" stop-opacity="0"></stop>
+            </radialGradient>
+          </defs>
+
+          <rect class="map-grid" width="800" height="800" fill="url(#sector-grid-large)"></rect>
+
+          <g class="map-layer map-layer--topo">
+            <path d="M52 536C106 466 128 380 187 320C249 256 328 248 388 185C448 123 541 104 619 155C702 208 756 306 725 395C698 473 630 505 590 574C548 647 470 725 373 708C289 694 265 627 194 605C132 585 83 578 52 536Z"></path>
+            <path d="M126 519C176 466 176 391 229 346C286 298 356 300 410 244C458 194 527 175 586 211C650 250 685 323 659 388C631 455 573 476 539 533C506 589 447 649 376 634C316 621 290 570 234 554C190 541 149 547 126 519Z"></path>
+            <path d="M217 488C250 453 250 408 287 379C324 350 375 355 412 320C446 287 493 272 532 297C574 324 592 366 574 407C556 448 516 459 495 496C474 532 432 566 390 557C351 549 335 518 299 508C265 498 235 504 217 488Z"></path>
+            <path d="M314 458C333 439 333 411 355 396C378 380 407 388 430 368C451 350 479 344 499 359C520 375 527 399 516 421C504 445 482 449 468 470C454 491 429 508 404 502C382 497 373 480 352 475C333 470 320 471 314 458Z"></path>
+          </g>
+
+          <g class="map-layer map-layer--range">
+            <circle cx="412" cy="429" r="78"></circle><circle cx="412" cy="429" r="162"></circle><circle cx="412" cy="429" r="254"></circle>
+            <path d="M79 164L412 429L712 132M104 675L412 429L735 660"></path>
+            <path class="range-sweep" d="M412 429L412 116A313 313 0 0 1 679 265Z"></path>
+          </g>
+
+          <g class="station-plan">
+            <path d="M365 386H458V409H492V472H447V500H366V471H331V410H365Z"></path>
+            <rect x="389" y="408" width="45" height="44"></rect>
+            <path d="M434 430H474"></path>
+          </g>
+
+          <g class="map-layer map-layer--thermal">
+            <circle cx="412" cy="429" r="150" fill="url(#thermal-halo)"></circle>
+            <circle class="thermal-contact thermal-contact--one" cx="452" cy="440" r="9"></circle>
+            <circle class="thermal-contact thermal-contact--two" cx="476" cy="468" r="7"></circle>
+            <circle class="thermal-contact thermal-contact--three" cx="431" cy="486" r="6"></circle>
+          </g>
+
+          <g class="map-origin">
+            <circle cx="412" cy="429" r="17"></circle><circle cx="412" cy="429" r="4"></circle>
+            <path d="M412 391V408M412 450V467M374 429H391M433 429H450"></path>
+          </g>
+
+          <g class="map-callouts">
+            <path d="M450 429H595V399"></path><text x="603" y="399">RX-07 / ORIGIN</text>
+            <path d="M476 468H633V500"></path><text x="640" y="505">CONTACT / UNVERIFIED</text>
+            <text x="30" y="45">SECTOR 12 / RESTRICTED</text><text x="650" y="770">ALT 4,280 M</text>
+          </g>
+        </svg>
+
+        <div class="sector-map__coordinates" aria-hidden="true"><span>46.2025 N</span><span>78.7419 E</span></div>
+        <div class="sector-map__legend" data-map-legend>Topographic acquisition</div>
+      </div>
+    </div>
+
+    <div class="location-copy" data-reveal>
+      <p class="instrument-label">Resolved coordinates / Fictional</p>
+      <h3 aria-label="46 degrees 12 minutes 09 seconds north, 78 degrees 44 minutes 31 seconds east">
+        <span data-coordinate="46° 12' 09&quot; N" aria-hidden="true">46° 12' 09&quot; N</span><br />
+        <span data-coordinate="78° 44' 31&quot; E" aria-hidden="true">78° 44' 31&quot; E</span>
+      </h3>
+      <dl>
+        <div><dt>Altitude</dt><dd>4,280 M</dd></div>
+        <div><dt>Access</dt><dd data-alert>Restricted</dd></div>
+        <div><dt>Bearing spread</dt><dd>0.06°</dd></div>
+        <div><dt>Calculated depth</dt><dd>-38 M</dd></div>
+        <div><dt>Last contact</dt><dd>03:18:04</dd></div>
+      </dl>
+
+      <aside class="location-anomaly">
+        <span>THERMAL / 03</span>
+        <p>Three transient contacts crossed the sealed service ring. No exterior approach was recorded.</p>
+      </aside>
+    </div>
   </div>
 </section>
+
+<style>
+  .location-section { overflow: hidden; }
+  .location-section__heading { margin-bottom: 6rem; }
+  .location-section__heading em { color: var(--archive-red); font-style: normal; }
+  .location-workspace { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 0.65fr); gap: 6rem; align-items: center; }
+  .sector-map { min-width: 0; border: 1px solid var(--archive-line-strong); background: #080d0f; }
+  .sector-map__bar { min-height: 5rem; }
+  .sector-map__screen { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(circle at 52% 54%, rgba(113, 187, 192, 0.08), transparent 38%), #070b0d; }
+  .sector-map svg { width: 100%; height: 100%; color: rgba(113, 187, 192, 0.12); }
+  .map-layer, .station-plan, .map-origin, .map-callouts { transition: opacity 420ms ease; }
+  .map-layer--topo path { fill: none; stroke: rgba(113, 187, 192, 0.42); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+  .map-layer--range { opacity: 0.18; }
+  .map-layer--range circle, .map-layer--range > path:first-of-type { fill: none; stroke: rgba(113, 187, 192, 0.58); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+  .range-sweep { fill: rgba(113, 187, 192, 0.08); stroke: rgba(113, 187, 192, 0.25); transform-origin: 412px 429px; }
+  .station-plan path, .station-plan rect { fill: rgba(113, 187, 192, 0.08); stroke: rgba(216, 224, 224, 0.75); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+  .map-layer--thermal { opacity: 0; }
+  .thermal-contact { fill: var(--archive-red); filter: drop-shadow(0 0 12px rgba(214, 75, 65, 0.9)); animation: thermal-flicker 2.4s steps(1) infinite; }
+  .thermal-contact--two { animation-delay: 0.6s; }.thermal-contact--three { animation-delay: 1.1s; }
+  .map-origin circle, .map-origin path { fill: none; stroke: var(--archive-red); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+  .map-origin circle:last-of-type { fill: var(--archive-red); filter: drop-shadow(0 0 8px var(--archive-red)); }
+  .map-callouts path { fill: none; stroke: rgba(216, 224, 224, 0.4); stroke-width: 1; vector-effect: non-scaling-stroke; }
+  .map-callouts text { fill: rgba(216, 224, 224, 0.65); font: 500 11px var(--archive-mono); }
+  [data-map-mode="range"] .map-layer--topo { opacity: 0.15; }
+  [data-map-mode="range"] .map-layer--range { opacity: 1; }
+  [data-map-mode="range"] .range-sweep { animation: range-rotate 5.5s linear infinite; }
+  [data-map-mode="thermal"] .map-layer--topo, [data-map-mode="thermal"] .map-layer--range { opacity: 0.12; }
+  [data-map-mode="thermal"] .map-layer--thermal { opacity: 1; }
+  .sector-map__coordinates { position: absolute; left: 1.25rem; bottom: 1.25rem; display: flex; gap: 1.25rem; color: var(--archive-muted); font: 400 0.58rem/1 var(--archive-mono); }
+  .sector-map__legend { position: absolute; right: 1.25rem; bottom: 1.25rem; color: var(--archive-cyan); font: 500 0.58rem/1 var(--archive-mono); text-transform: uppercase; }
+  .location-copy h3 { margin: 1.5rem 0 4rem; font: 450 clamp(2.65rem, 3vw, 3.4rem)/1.08 var(--archive-mono); }
+  .location-copy h3 span { white-space: nowrap; }
+  .location-copy dl { margin: 0; border-top: 1px solid var(--archive-line-strong); }
+  .location-copy dl div { min-height: 3.75rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; border-bottom: 1px solid var(--archive-line); }
+  .location-copy dd { margin: 0; font: 500 0.72rem/1 var(--archive-mono); text-transform: uppercase; }
+  .location-copy dd[data-alert] { color: var(--archive-red); }
+  .location-anomaly { margin-top: 3.5rem; padding: 1.25rem 0 0 1.25rem; border-top: 1px solid var(--archive-red); border-left: 1px solid var(--archive-red); }
+  .location-anomaly span { color: var(--archive-red); font: 500 0.65rem/1 var(--archive-mono); }
+  .location-anomaly p { max-width: 25rem; margin: 1rem 0 0; color: var(--archive-muted); font-size: 0.95rem; line-height: 1.6; }
+  @keyframes range-rotate { to { transform: rotate(360deg); } }
+  @keyframes thermal-flicker { 0%, 76%, 100% { opacity: 0.9; } 77%, 83% { opacity: 0.2; } 84%, 91% { opacity: 0.65; } }
+
+  @media (max-width: 1050px) {
+    .location-workspace { grid-template-columns: 1fr; gap: 4rem; }
+    .location-copy { display: grid; grid-template-columns: 1fr 1fr; gap: 0 3rem; }
+    .location-copy > p, .location-copy h3 { grid-column: 1 / -1; }
+    .location-copy h3 { font-size: 3.25rem; }
+    .location-anomaly { margin-top: 0; }
+  }
+  @media (max-width: 767px) {
+    .location-section__heading { margin-bottom: 4rem; }
+    .sector-map__bar { align-items: flex-start; flex-direction: column; }
+    .sector-map__screen { aspect-ratio: 1 / 1.15; }
+    .sector-map__coordinates { display: none; }
+    .sector-map__legend { left: 1rem; right: auto; }
+    .map-callouts text { display: none; }
+    .location-copy { display: block; }
+    .location-copy h3 { margin-bottom: 2.75rem; font-size: 2.25rem; }
+    .location-anomaly { margin-top: 3rem; }
+  }
+</style>

@@ -1,0 +1,17 @@
+---
+import FinalSection from "./FinalSection.astro";
+import LocationSection from "./LocationSection.astro";
+import SignalDataSection from "./SignalDataSection.astro";
+import TransmissionSection from "./TransmissionSection.astro";
+---
+
+<div class="post-sequence" data-post-sequence>
+  <SignalDataSection />
+  <TransmissionSection />
+  <LocationSection />
+  <FinalSection />
+</div>
+
+<script>
+  import "../../scripts/sections/init";
+</script>

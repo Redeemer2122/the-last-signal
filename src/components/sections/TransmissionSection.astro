@@ -1,22 +1,159 @@
 ---
 const fragments = [
-  "The first pulse repeated at intervals too precise to be atmospheric.",
-  "The pattern changed after the station transmitted a diagnostic tone.",
-  "The final sequence contained the station's own identifier.",
+  {
+    id: "fragment-01",
+    number: "01",
+    time: "03:17:42.118",
+    integrity: "94%",
+    title: "A pulse too precise to be atmospheric",
+    body: "The first carrier repeated at intervals of exactly 11.000 seconds. No drift was measured across forty-seven cycles.",
+    decode: "PERIODIC CARRIER / ORIGIN UNRESOLVED",
+    waveform: "0,30 22,29 38,27 52,32 67,29 82,8 96,52 112,27 132,30 154,29 178,28 198,30 220,30 242,28 260,31 280,30",
+  },
+  {
+    id: "fragment-02",
+    number: "02",
+    time: "03:17:49.831",
+    integrity: "81%",
+    title: "The pattern changed after our diagnostic",
+    body: "RX-07 transmitted a calibration tone. The incoming carrier returned the station pattern before the local relay finished broadcasting it.",
+    decode: "RESPONSE OFFSET / -00:00:00.730",
+    waveform: "0,30 18,30 34,24 46,36 60,30 76,29 90,12 103,47 116,15 129,44 144,29 162,31 180,27 198,34 214,30 234,29 252,31 280,30",
+  },
+  {
+    id: "fragment-03",
+    number: "03",
+    time: "03:18:04.006",
+    integrity: "63%",
+    title: "The final sequence used an internal identifier",
+    body: "The decoded header named receiver RX-07 and service door C. The door reported open. No authorized operator was registered inside the station.",
+    decode: "RX-07 / INTERNAL / DOOR-C OPEN",
+    waveform: "0,30 14,30 28,10 40,50 52,18 64,42 76,8 88,52 100,22 112,38 126,30 142,30 158,16 170,44 184,30 202,29 220,31 238,12 250,48 264,30 280,30",
+  },
 ];
 ---
-<section class="transmission-section section-band">
-  <div class="section-index"><span>06</span><span>TRANSCRIPT</span></div>
-  <header class="section-heading">
-    <p class="eyebrow">Recovered fragments</p>
-    <h2>Three entries survived the archive failure.</h2>
+
+<section class="transmission-section section-band" data-archive-section="transmission">
+  <div class="section-index"><span>06</span><span>TRANSMISSION ARCHIVE</span></div>
+
+  <header class="section-heading transmission-section__heading" data-reveal>
+    <p class="eyebrow">Recovered fragments / Restricted</p>
+    <h2>The archive did not fail.<br /><em>It was interrupted.</em></h2>
+    <p class="section-lede">Three entries survived in the receiver cache. Their timestamps span less than twenty-two seconds.</p>
   </header>
-  <ol class="fragment-list">
-    {fragments.map((fragment, index) => (
-      <li>
-        <span>Fragment {String(index + 1).padStart(2, "0")}</span>
-        <p>{fragment}</p>
-      </li>
-    ))}
-  </ol>
+
+  <div class="archive-workspace" data-fragment-archive>
+    <aside class="archive-summary" data-reveal>
+      <div class="archive-summary__dial" aria-hidden="true">
+        <span>03</span>
+        <i></i>
+      </div>
+      <dl>
+        <div><dt>Recovered</dt><dd>03 / 03</dd></div>
+        <div><dt>Window</dt><dd>21.888 S</dd></div>
+        <div><dt>Checksum</dt><dd>Partial</dd></div>
+        <div><dt>Classification</dt><dd>Internal</dd></div>
+      </dl>
+      <p>Archive node 04 stopped recording immediately after the last decoded header.</p>
+    </aside>
+
+    <ol class="fragment-list">
+      {fragments.map((fragment, index) => (
+        <li class:list={["fragment-item", { "is-active": index === 0 }]} data-fragment-item data-reveal>
+          <button
+            type="button"
+            class="fragment-select"
+            data-fragment-select
+            aria-expanded={index === 0 ? "true" : "false"}
+            aria-controls={`${fragment.id}-detail`}
+          >
+            <span class="fragment-select__number">FRG / {fragment.number}</span>
+            <span>{fragment.time} UTC</span>
+            <span>{fragment.integrity} INTEGRITY</span>
+            <i aria-hidden="true"></i>
+          </button>
+
+          <div class="fragment-wave" aria-hidden="true">
+            <svg viewBox="0 0 280 60" preserveAspectRatio="none">
+              <line x1="0" y1="30" x2="280" y2="30"></line>
+              <polyline points={fragment.waveform}></polyline>
+            </svg>
+            <span></span>
+          </div>
+
+          <div class="fragment-detail" id={`${fragment.id}-detail`} data-fragment-detail hidden={index !== 0}>
+            <h3>{fragment.title}</h3>
+            <p>{fragment.body}</p>
+            <code>{fragment.decode}</code>
+          </div>
+        </li>
+      ))}
+    </ol>
+  </div>
 </section>
+
+<style>
+  .transmission-section { background: var(--archive-surface); }
+  .transmission-section::before { content: ""; position: absolute; inset: 0; pointer-events: none; opacity: 0.3; background-image: linear-gradient(var(--archive-line) 1px, transparent 1px); background-size: 100% 8rem; mask-image: linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent); }
+  .transmission-section__heading { width: min(66rem, 82%); margin-bottom: 7rem; }
+  .transmission-section__heading em { color: var(--archive-amber); font-style: normal; }
+  .archive-workspace { position: relative; display: grid; grid-template-columns: minmax(16rem, 0.55fr) minmax(0, 1.45fr); gap: 7rem; align-items: start; }
+  .archive-summary { position: sticky; top: 3rem; }
+  .archive-summary__dial { position: relative; width: 9rem; aspect-ratio: 1; margin-bottom: 3rem; display: grid; place-items: center; border: 1px solid var(--archive-line-strong); border-radius: 50%; color: var(--archive-text); font: 400 2.6rem/1 var(--archive-mono); }
+  .archive-summary__dial::before, .archive-summary__dial::after { content: ""; position: absolute; inset: 0.75rem; border: 1px solid var(--archive-line); border-radius: 50%; }
+  .archive-summary__dial::after { inset: 2.15rem; border-color: rgba(201, 162, 88, 0.4); }
+  .archive-summary__dial i { position: absolute; top: -0.25rem; left: 50%; width: 0.5rem; height: 0.5rem; border-radius: 50%; background: var(--archive-amber); box-shadow: 0 0 1rem var(--archive-amber); }
+  .archive-summary dl { margin: 0; border-top: 1px solid var(--archive-line-strong); }
+  .archive-summary dl div { min-height: 3.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; border-bottom: 1px solid var(--archive-line); }
+  .archive-summary dd { margin: 0; color: var(--archive-text); font: 500 0.68rem/1 var(--archive-mono); text-transform: uppercase; }
+  .archive-summary > p { margin: 2rem 0 0; max-width: 19rem; color: var(--archive-muted); font-size: 0.9rem; line-height: 1.6; }
+  .fragment-list { position: relative; list-style: none; margin: 0; padding: 0 0 0 1.75rem; }
+  .fragment-list::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 1px; background: linear-gradient(var(--archive-amber), var(--archive-line-strong) 34%, var(--archive-line-strong) 78%, var(--archive-red)); }
+  .fragment-item { position: relative; padding: 0 0 3rem; border-top: 1px solid var(--archive-line-strong); }
+  .fragment-item::before { content: ""; position: absolute; z-index: 2; top: 2.1rem; left: -2rem; width: 0.5rem; height: 0.5rem; border: 1px solid var(--archive-muted); border-radius: 50%; background: var(--archive-surface); }
+  .fragment-item.is-active::before { border-color: var(--archive-amber); background: var(--archive-amber); box-shadow: 0 0 1rem rgba(201, 162, 88, 0.75); }
+  .fragment-item:last-child { border-bottom: 1px solid var(--archive-line-strong); }
+  .fragment-select { width: 100%; min-height: 4.75rem; padding: 0; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1.5rem; align-items: center; border: 0; background: transparent; color: var(--archive-muted); cursor: pointer; font: 500 0.64rem/1 var(--archive-mono); text-align: left; text-transform: uppercase; }
+  .fragment-select__number { color: var(--archive-text); }
+  .fragment-select i { width: 0.55rem; height: 0.55rem; border: 1px solid currentColor; border-radius: 50%; }
+  .fragment-item.is-active .fragment-select { color: var(--archive-amber); }
+  .fragment-item.is-active .fragment-select__number { color: var(--archive-text); }
+  .fragment-item.is-active .fragment-select i { border-color: var(--archive-amber); background: var(--archive-amber); box-shadow: 0 0 1rem rgba(201, 162, 88, 0.7); }
+  .fragment-wave { position: relative; height: 6rem; overflow: hidden; background: rgba(5, 9, 10, 0.54); border-block: 1px solid var(--archive-line); }
+  .fragment-wave::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(113, 187, 192, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(113, 187, 192, 0.08) 1px, transparent 1px); background-size: 2rem 1.5rem; }
+  .fragment-wave svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .fragment-wave line { stroke: rgba(113, 187, 192, 0.25); stroke-width: 0.8; }
+  .fragment-wave polyline { fill: none; stroke: rgba(113, 187, 192, 0.5); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
+  .fragment-wave span { position: absolute; top: 0; bottom: 0; left: 0; width: 1px; opacity: 0; background: var(--archive-amber); box-shadow: 0 0 1.5rem var(--archive-amber); }
+  .fragment-item.is-active .fragment-wave polyline { stroke: var(--archive-amber); }
+  .fragment-item.is-active .fragment-wave span { opacity: 1; animation: archive-scan 3.8s linear infinite; }
+  .fragment-detail { padding: 2.5rem 0 0 22%; animation: decode-reveal 680ms cubic-bezier(0.2, 0.75, 0.2, 1) both; }
+  .fragment-detail h3 { margin: 0; max-width: 34rem; font: 500 2rem/1.08 var(--archive-display); text-transform: uppercase; }
+  .fragment-detail p { max-width: 37rem; margin: 1.4rem 0 1.8rem; color: var(--archive-muted); font-size: 1rem; line-height: 1.65; }
+  .fragment-detail code { display: block; padding-left: 1rem; border-left: 2px solid var(--archive-amber); color: var(--archive-amber); font: 500 0.74rem/1.5 var(--archive-mono); }
+  .fragment-item:nth-child(3).is-active .fragment-detail h3 { animation: fragment-glitch 420ms steps(2, end) 1; }
+  @keyframes archive-scan { from { transform: translateX(0); } to { transform: translateX(62rem); } }
+  @keyframes decode-reveal { from { opacity: 0; clip-path: inset(0 100% 0 0); transform: translateY(0.75rem); } to { opacity: 1; clip-path: inset(0); transform: translateY(0); } }
+  @keyframes fragment-glitch { 0%, 100% { transform: none; text-shadow: none; } 25% { transform: translateX(3px); text-shadow: -3px 0 var(--archive-red), 3px 0 var(--archive-cyan); } 55% { transform: translateX(-2px); text-shadow: 2px 0 var(--archive-amber); } 75% { transform: translateX(1px); } }
+
+  @media (max-width: 900px) {
+    .archive-workspace { grid-template-columns: 1fr; gap: 4rem; }
+    .archive-summary { position: relative; top: auto; display: grid; grid-template-columns: auto 1fr; gap: 2rem; }
+    .archive-summary__dial { margin: 0; }
+    .archive-summary > p { grid-column: 2; }
+  }
+  @media (max-width: 767px) {
+    .transmission-section__heading { width: 100%; margin-bottom: 4.5rem; }
+    .archive-summary { display: block; }
+    .archive-summary__dial { width: 7rem; margin-bottom: 2rem; }
+    .archive-summary > p { margin-bottom: 1rem; }
+    .fragment-list { padding-left: 1.25rem; }
+    .fragment-item::before { left: -1.5rem; }
+    .fragment-select { min-height: 6rem; grid-template-columns: 1fr auto; gap: 0.65rem 1rem; }
+    .fragment-select span:nth-child(2), .fragment-select span:nth-child(3) { grid-row: 2; }
+    .fragment-select i { grid-column: 2; grid-row: 1 / 3; }
+    .fragment-wave { height: 5rem; }
+    .fragment-detail { padding-left: 0; }
+    .fragment-detail h3 { font-size: 1.55rem; }
+  }
+</style>

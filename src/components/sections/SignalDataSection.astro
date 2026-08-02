@@ -1,14 +1,114 @@
-<section id="signal-data" class="data-section section-band">
+---
+const telemetry = [
+  { label: "Frequency", value: "4.721 GHz", tone: "signal" },
+  { label: "Duration", value: "00:08:41", tone: "neutral" },
+  { label: "Source", value: "Unresolved", tone: "warning" },
+  { label: "Repetition", value: "Every 11 hours", tone: "neutral" },
+  { label: "Phase response", value: "+0.73 seconds", tone: "warning" },
+  { label: "Carrier status", value: "Locked", tone: "active" },
+];
+---
+
+<section id="signal-data" class="data-section section-band" data-archive-section="signal">
   <div class="section-index"><span>05</span><span>SIGNAL DATA</span></div>
-  <div class="section-heading">
-    <p class="eyebrow">Recovered telemetry</p>
-    <h2>The frequency is stable.<br />The source is not.</h2>
+
+  <header class="section-heading data-section__heading" data-reveal>
+    <p class="eyebrow">Recovered telemetry / Capture 07</p>
+    <h2>The carrier is stable.<br /><em>The response is not.</em></h2>
+    <p class="section-lede">The station transmitted one diagnostic pulse. The signal returned the same pattern before the local relay completed its cycle.</p>
+  </header>
+
+  <div class="signal-console" data-signal-scope data-scope-state="live" data-reveal>
+    <div class="instrument-bar">
+      <div>
+        <span class="instrument-label">Wideband receiver</span>
+        <strong>RX-07 / 4.721</strong>
+      </div>
+      <div class="mode-switch" role="group" aria-label="Signal display mode">
+        <button type="button" data-scope-mode="live" aria-pressed="true">Live feed</button>
+        <button type="button" data-scope-mode="archive" aria-pressed="false">Capture 07</button>
+      </div>
+    </div>
+
+    <div class="scope-screen">
+      <canvas data-scope-canvas width="1200" height="360" aria-hidden="true"></canvas>
+      <div class="scope-screen__axis" aria-hidden="true"><span>+12</span><span>0</span><span>-12</span></div>
+      <div class="scope-screen__frequency" aria-hidden="true"><span>4.719</span><span>4.720</span><b>4.721 GHz</b><span>4.722</span><span>4.723</span></div>
+      <div class="scope-screen__status"><i></i><span data-scope-status>Monitoring live carrier</span></div>
+    </div>
+
+    <div class="signal-console__footer" aria-label="Receiver status">
+      <span data-state="locked"><i></i>CARRIER / LOCK</span>
+      <span data-state="locked"><i></i>PHASE / SYNC</span>
+      <span data-state="response"><i></i>RESPONSE / TRACE</span>
+      <span data-state="locked"><i></i>RECEIVER / ACTIVE</span>
+    </div>
   </div>
-  <dl class="signal-list">
-    <div><dt>Frequency</dt><dd>4.721 GHz</dd></div>
-    <div><dt>Duration</dt><dd>00:08:41</dd></div>
-    <div><dt>Source</dt><dd>Unknown</dd></div>
-    <div><dt>Repetition</dt><dd>Every 11 hours</dd></div>
-    <div><dt>Status</dt><dd><i></i> Active</dd></div>
-  </dl>
+
+  <div class="telemetry-layout">
+    <dl class="signal-list">
+      {telemetry.map((item) => (
+        <div data-reveal>
+          <dt>{item.label}</dt>
+          <dd data-tone={item.tone}><i></i>{item.value}</dd>
+        </div>
+      ))}
+    </dl>
+
+    <aside class="anomaly-note" data-reveal>
+      <div class="anomaly-note__index">A-01</div>
+      <div>
+        <p class="instrument-label">Timing anomaly</p>
+        <strong>The reply arrived 0.73 seconds too early.</strong>
+        <p>No known relay path can account for the difference.</p>
+      </div>
+    </aside>
+  </div>
 </section>
+
+<style>
+  .data-section { background: radial-gradient(circle at 78% 26%, rgba(113, 187, 192, 0.07), transparent 26%), var(--archive-bg); }
+  .data-section__heading { margin-bottom: 3.75rem; }
+  .data-section__heading em { color: var(--archive-cyan); font-style: normal; }
+  .signal-console { overflow: hidden; border: 1px solid var(--archive-line-strong); background: rgba(12, 17, 19, 0.88); box-shadow: 0 2rem 6rem rgba(0, 0, 0, 0.28); }
+  .instrument-bar { min-height: 5.5rem; padding: 1.25rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 2rem; border-bottom: 1px solid var(--archive-line); }
+  .instrument-bar > div:first-child { display: grid; gap: 0.45rem; }
+  .instrument-bar strong { font: 500 1rem/1 var(--archive-mono); }
+  .scope-screen { position: relative; aspect-ratio: 10 / 3; min-height: 17rem; background: #071012; overflow: hidden; }
+  .scope-screen canvas { width: 100%; height: 100%; }
+  .scope-screen__axis { position: absolute; inset: 1.25rem auto 2.6rem 1rem; display: flex; flex-direction: column; justify-content: space-between; color: rgba(194, 218, 220, 0.42); font: 400 0.58rem/1 var(--archive-mono); }
+  .scope-screen__frequency { position: absolute; left: 3.4rem; right: 1.25rem; bottom: 0.8rem; display: flex; justify-content: space-between; color: rgba(194, 218, 220, 0.42); font: 400 0.58rem/1 var(--archive-mono); }
+  .scope-screen__frequency b { color: var(--archive-cyan); font-weight: 500; }
+  .scope-screen__status { position: absolute; top: 1rem; right: 1rem; display: flex; align-items: center; gap: 0.55rem; color: var(--archive-text); font: 500 0.62rem/1 var(--archive-mono); text-transform: uppercase; }
+  .scope-screen__status i { width: 0.42rem; height: 0.42rem; border-radius: 50%; background: var(--archive-cyan); box-shadow: 0 0 0.9rem var(--archive-cyan); }
+  .signal-console__footer { min-height: 3rem; padding: 0.8rem 1.5rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; border-top: 1px solid var(--archive-line); color: var(--archive-muted); font: 400 0.6rem/1 var(--archive-mono); }
+  .signal-console__footer span { display: inline-flex; align-items: center; gap: 0.5rem; }
+  .signal-console__footer i { width: 0.35rem; height: 0.35rem; border-radius: 50%; background: var(--archive-cyan); box-shadow: 0 0 0.6rem rgba(113, 187, 192, 0.65); }
+  .signal-console__footer [data-state="response"] { color: var(--archive-amber); }
+  .signal-console__footer [data-state="response"] i { background: var(--archive-amber); box-shadow: 0 0 0.6rem rgba(201, 162, 88, 0.65); }
+  .signal-console[data-scope-state="archive"] .signal-console__footer [data-state="response"] { color: var(--archive-red); }
+  .signal-console[data-scope-state="archive"] .signal-console__footer [data-state="response"] i { background: var(--archive-red); box-shadow: 0 0 0.75rem rgba(214, 75, 65, 0.78); }
+  .telemetry-layout { margin-top: 5rem; display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(18rem, 0.65fr); gap: 5rem; align-items: start; }
+  .signal-list { margin: 0; border-top: 1px solid var(--archive-line-strong); }
+  .signal-list > div { min-height: 4.25rem; display: grid; grid-template-columns: 1fr auto; gap: 2rem; align-items: center; border-bottom: 1px solid var(--archive-line); }
+  .signal-list dd { margin: 0; display: flex; align-items: center; gap: 0.65rem; color: var(--archive-text); font: 500 0.9rem/1 var(--archive-mono); text-transform: uppercase; }
+  .signal-list dd i { width: 0.38rem; height: 0.38rem; border-radius: 50%; background: var(--archive-muted); }
+  .signal-list dd[data-tone="signal"] { color: var(--archive-cyan); }
+  .signal-list dd[data-tone="signal"] i, .signal-list dd[data-tone="active"] i { background: var(--archive-cyan); box-shadow: 0 0 0.8rem rgba(113, 187, 192, 0.7); }
+  .signal-list dd[data-tone="warning"] { color: var(--archive-amber); }
+  .signal-list dd[data-tone="warning"] i { background: var(--archive-amber); }
+  .anomaly-note { display: grid; grid-template-columns: 3.5rem 1fr; gap: 1.25rem; padding-top: 1.25rem; border-top: 1px solid var(--archive-red); }
+  .anomaly-note__index { color: var(--archive-red); font: 500 0.7rem/1 var(--archive-mono); }
+  .anomaly-note strong { display: block; margin-top: 1rem; max-width: 20rem; font: 500 1.45rem/1.25 var(--archive-display); }
+  .anomaly-note > div:last-child > p:last-child { max-width: 20rem; margin: 1.2rem 0 0; color: var(--archive-muted); font-size: 0.92rem; line-height: 1.55; }
+
+  @media (max-width: 767px) {
+    .data-section__heading { margin-bottom: 3.5rem; }
+    .instrument-bar { align-items: flex-start; flex-direction: column; }
+    .scope-screen { aspect-ratio: auto; height: 20rem; min-height: 0; }
+    .scope-screen__frequency span:nth-child(even) { display: none; }
+    .signal-console__footer { display: grid; grid-template-columns: 1fr 1fr; }
+    .telemetry-layout { margin-top: 3.5rem; grid-template-columns: 1fr; gap: 3rem; }
+    .signal-list > div { grid-template-columns: 1fr; gap: 0.55rem; padding: 1rem 0; }
+  }
+</style>
