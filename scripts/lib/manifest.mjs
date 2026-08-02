@@ -1,0 +1,61 @@
+export const SEQUENCE_ID = "the-last-signal";
+export const SAMPLE_FPS = 13;
+export const TRANSITION_04_START = 24;
+export const MASTER_DURATION = 32;
+export const FRAME_REPLACEMENTS = [
+  { target: 209, source: 210 },
+];
+export const FRAME_REMOVALS = [313, 314];
+
+export const SOURCE_FILES = [
+  "the-last-signal-transition-01.mp4",
+  "the-last-signal-transition-02.mp4",
+  "the-last-signal-transition-03.mp4",
+  "the-last-signal-transition-04.mp4",
+];
+
+export function buildChapters(frameCount) {
+  const at = (ratio) => Math.max(1, Math.min(frameCount, Math.round(frameCount * ratio)));
+  return [
+    {
+      id: "opening", frameStart: 1, frameFocus: at(0.07), frameEnd: at(0.17),
+      eyebrow: "Transmission 07-16", title: "THE LAST SIGNAL",
+      body: "A signal was received. No source was found. The transmission continues.", align: "left",
+    },
+    {
+      id: "contact", frameStart: at(0.17), frameFocus: at(0.25), frameEnd: at(0.34),
+      eyebrow: "01 — CONTACT", title: "Unknown source",
+      body: "At 03:17, the station received a transmission from an unknown source.", align: "right",
+    },
+    {
+      id: "threshold", frameStart: at(0.34), frameFocus: at(0.44), frameEnd: at(0.49),
+      eyebrow: "02 — THRESHOLD", title: "The door remained open",
+      body: "The facility was abandoned. The signal was still active.", align: "left",
+    },
+    {
+      id: "origin", frameStart: at(0.49), frameFocus: at(0.65), frameEnd: at(0.74),
+      eyebrow: "03 — ORIGIN", title: "No registered frequency",
+      body: "No satellite. No aircraft. No registered frequency.", align: "right",
+    },
+    {
+      id: "message", frameStart: at(0.74), frameFocus: at(0.91), frameEnd: frameCount,
+      eyebrow: "04 — THE MESSAGE", title: "It was answering us.",
+      body: "It was not calling for help.", align: "center",
+    },
+  ];
+}
+
+export function buildManifest(frameCount) {
+  return {
+    version: 1,
+    frameCount,
+    samplingFps: SAMPLE_FPS,
+    desktop: { path: "/sequences/the-last-signal/desktop/frame-{frame}.webp", width: 1920, height: 1080 },
+    mobile: { path: "/sequences/the-last-signal/mobile/frame-{frame}.webp", width: 1080, height: 1350 },
+    poster: {
+      desktop: "/sequences/the-last-signal/posters/poster-desktop.webp",
+      mobile: "/sequences/the-last-signal/posters/poster-mobile.webp",
+    },
+    chapters: buildChapters(frameCount),
+  };
+}

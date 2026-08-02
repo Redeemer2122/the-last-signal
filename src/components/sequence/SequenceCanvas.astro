@@ -1,0 +1,9 @@
+---
+interface Props { desktopPoster: string; mobilePoster: string }
+const { desktopPoster, mobilePoster } = Astro.props;
+---
+<canvas class="sequence-canvas" aria-hidden="true"></canvas>
+<picture class="sequence-fallback">
+  <source media="(max-width: 767px)" srcset={mobilePoster} />
+  <img src={desktopPoster} alt="An abandoned radio station in frozen mountains beneath a storm sky" width="1920" height="1080" />
+</picture>

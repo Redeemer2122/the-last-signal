@@ -1,0 +1,22 @@
+---
+const fragments = [
+  "The first pulse repeated at intervals too precise to be atmospheric.",
+  "The pattern changed after the station transmitted a diagnostic tone.",
+  "The final sequence contained the station's own identifier.",
+];
+---
+<section class="transmission-section section-band">
+  <div class="section-index"><span>06</span><span>TRANSCRIPT</span></div>
+  <header class="section-heading">
+    <p class="eyebrow">Recovered fragments</p>
+    <h2>Three entries survived the archive failure.</h2>
+  </header>
+  <ol class="fragment-list">
+    {fragments.map((fragment, index) => (
+      <li>
+        <span>Fragment {String(index + 1).padStart(2, "0")}</span>
+        <p>{fragment}</p>
+      </li>
+    ))}
+  </ol>
+</section>

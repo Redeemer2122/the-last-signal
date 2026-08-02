@@ -1,0 +1,34 @@
+---
+import { NARRATIVE_CHAPTERS } from "../../scripts/sequence/config";
+import NoiseOverlay from "../ui/NoiseOverlay.astro";
+import SiteHeader from "../ui/SiteHeader.astro";
+import SequenceCanvas from "./SequenceCanvas.astro";
+import SequenceChapter from "./SequenceChapter.astro";
+import SequenceLoader from "./SequenceLoader.astro";
+import SequenceProgress from "./SequenceProgress.astro";
+---
+<section class="sequence-stage" data-sequence data-mode="booting" aria-label="The Last Signal transmission journey">
+  <div class="sequence-viewport" data-sequence-viewport>
+    <SequenceCanvas
+      desktopPoster="/sequences/the-last-signal/posters/poster-desktop.webp"
+      mobilePoster="/sequences/the-last-signal/posters/poster-mobile.webp"
+    />
+    <div class="sequence-treatment" aria-hidden="true"></div>
+    <NoiseOverlay />
+    <SiteHeader />
+    <div class="sequence-readout" aria-hidden="true">
+      <span><i></i> RECEIVER ONLINE</span>
+      <span>03:17:42 UTC</span>
+      <span>LOCATION CLASSIFIED</span>
+    </div>
+    <div class="sequence-chapters">
+      {NARRATIVE_CHAPTERS.map((chapter) => <SequenceChapter {...chapter} />)}
+    </div>
+    <SequenceProgress />
+    <SequenceLoader />
+  </div>
+</section>
+
+<script>
+  import "../../scripts/sequence/init";
+</script>

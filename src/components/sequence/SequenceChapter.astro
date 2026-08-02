@@ -1,0 +1,15 @@
+---
+interface Props {
+  id: string;
+  eyebrow: string;
+  title: string;
+  body: string;
+  align: "left" | "right" | "center";
+}
+const { id, eyebrow, title, body, align } = Astro.props;
+---
+<article id={id} class={`sequence-chapter sequence-chapter--${align}`} data-chapter={id}>
+  <p class="sequence-chapter__eyebrow">{eyebrow}</p>
+  <h2>{title}</h2>
+  <p>{body}</p>
+</article>
