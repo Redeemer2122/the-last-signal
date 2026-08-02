@@ -45,7 +45,7 @@ export function createSequenceTimeline({ stage, viewport, chapters, samplingFps,
       if (element) {
         if (chapter.id !== "opening") {
           timeline.fromTo(element, { autoAlpha: 0, y: 24 }, { autoAlpha: 1, y: 0, duration: 0.6 });
-          timeline.to({}, { duration: chapter.id === "message" ? 2.8 : 2 });
+          timeline.to({}, { duration: chapter.id === "message" ? 1.6 : 1.2 });
         }
         timeline.to(element, { autoAlpha: chapter.id === "message" ? 1 : 0, y: chapter.id === "message" ? 0 : -18, duration: 0.5 });
       }
