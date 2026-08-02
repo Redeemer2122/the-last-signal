@@ -3,6 +3,7 @@ import path from "node:path";
 import { assertFfmpeg, probeJson, run } from "./lib/ffmpeg.mjs";
 import { ensureDirectory, fileExists, fromRoot } from "./lib/filesystem.mjs";
 import {
+  FRAME_REMOVALS,
   MASTER_DURATION,
   SAMPLE_FPS,
   SOURCE_FILES,
@@ -41,6 +42,7 @@ const rows = metadata.map(({ name, streams, format }) => {
   return `| ${name} | ${Number(format.duration).toFixed(3)} s | ${video.width}×${video.height} | ${video.avg_frame_rate} | ${video.codec_name} | ${video.pix_fmt} |`;
 }).join("\n");
 const expectedFrames = Math.round(MASTER_DURATION * SAMPLE_FPS);
+const outputFrames = expectedFrames - FRAME_REMOVALS.length;
 
 const report = `# Video processing report
 
@@ -67,8 +69,8 @@ Contact sheets are written to \`output/video-inspection/\` and intentionally git
 
 - Normalize each usable segment to 1920×1080, 24 fps, H.264, yuv420p, CFR, without audio.
 - Concatenate all four complete normalized transitions in source order without overlap or crossfade.
-- Sample the ${MASTER_DURATION.toFixed(3)}-second master at ${SAMPLE_FPS} fps. This produces ${expectedFrames} frames, within the requested 320–420 useful-frame envelope while preserving every source segment.
-- Replace boundary sample 209 with its immediate forward neighbor at the 02→03 cut. Remove samples 313–314 and compact the remaining sequence to 414 frames, eliminating the reverse-and-hold artifact at the 03→04 cut.
+- Sample the ${MASTER_DURATION.toFixed(3)}-second master at its native ${SAMPLE_FPS} fps. This produces ${expectedFrames} source frames and preserves every original frame outside the repaired cut windows.
+- Remove native samples 385–387 at the 02→03 cut and 577–581 at the 03→04 cut, then compact the sequence to ${outputFrames} frames. These time-derived windows preserve the last valid frame before each cut and resume after the single-frame camera reversals found during native 24 fps scroll QA.
 - Generate desktop WebP at 1920×1080 (quality 38) and mobile WebP at 1080×1350 (quality 18). The mobile crop is centered through transition 03 and shifts left for transition 04 to preserve the circular display.
 
 Exact output counts, scene indices, and sizes are written by \`npm run sequence:build\` to \`docs/sequence-manifest.md\`.

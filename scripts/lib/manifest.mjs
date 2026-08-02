@@ -1,11 +1,15 @@
 export const SEQUENCE_ID = "the-last-signal";
-export const SAMPLE_FPS = 13;
+export const SAMPLE_FPS = 24;
 export const TRANSITION_04_START = 24;
 export const MASTER_DURATION = 32;
-export const FRAME_REPLACEMENTS = [
-  { target: 209, source: 210 },
+export const FRAME_REMOVAL_WINDOWS = [
+  { startTime: 16, frameCount: 3 },
+  { startTime: 24, frameCount: 5 },
 ];
-export const FRAME_REMOVALS = [313, 314];
+export const FRAME_REMOVALS = FRAME_REMOVAL_WINDOWS.flatMap(({ startTime, frameCount }) => {
+  const startFrame = Math.round(startTime * SAMPLE_FPS) + 1;
+  return Array.from({ length: frameCount }, (_, index) => startFrame + index);
+});
 
 export const SOURCE_FILES = [
   "the-last-signal-transition-01.mp4",

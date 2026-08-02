@@ -5,7 +5,6 @@ import { directorySize, ensureDirectory, fileExists, formatBytes, fromRoot, rese
 import {
   buildManifest,
   FRAME_REMOVALS,
-  FRAME_REPLACEMENTS,
   MASTER_DURATION,
   SAMPLE_FPS,
   SEQUENCE_ID,
@@ -75,13 +74,6 @@ await run(ffmpeg, [
   "-c:v", "libwebp", "-quality", "18", "-compression_level", "6", "-start_number", "1",
   path.join(mobileDirectory, "frame-%04d.webp"),
 ]);
-
-for (const { target, source } of FRAME_REPLACEMENTS) {
-  const targetName = `frame-${String(target).padStart(4, "0")}.webp`;
-  const sourceName = `frame-${String(source).padStart(4, "0")}.webp`;
-  await copyFile(path.join(desktopDirectory, sourceName), path.join(desktopDirectory, targetName));
-  await copyFile(path.join(mobileDirectory, sourceName), path.join(mobileDirectory, targetName));
-}
 
 async function removeAndCompactFrames(directory) {
   const frames = (await readdir(directory)).filter((name) => /^frame-\d{4}\.webp$/.test(name)).sort();
