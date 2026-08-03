@@ -57,38 +57,67 @@ const fragments = [
       <p>Archive node 04 stopped recording immediately after the last decoded header.</p>
     </aside>
 
-    <ol class="fragment-list">
-      {fragments.map((fragment, index) => (
-        <li class:list={["fragment-item", { "is-active": index === 0 }]} data-fragment-item data-reveal>
+    <div class="fragment-device" data-reveal>
+      <div class="fragment-device__bar">
+        <div>
+          <span class="instrument-label">Recovery channel</span>
+          <strong>ARC-04 / CACHE BUFFER</strong>
+        </div>
+        <span class="fragment-device__state"><i></i>03 RECORDS READY</span>
+      </div>
+
+      <div class="fragment-tabs" role="tablist" aria-label="Recovered fragment">
+        {fragments.map((fragment, index) => (
           <button
             type="button"
-            class="fragment-select"
+            role="tab"
             data-fragment-select
-            aria-expanded={index === 0 ? "true" : "false"}
-            aria-controls={`${fragment.id}-detail`}
+            aria-selected={index === 0 ? "true" : "false"}
+            aria-controls={`${fragment.id}-panel`}
           >
-            <span class="fragment-select__number">FRG / {fragment.number}</span>
-            <span>{fragment.time} UTC</span>
-            <span>{fragment.integrity} INTEGRITY</span>
+            <span>FRG / {fragment.number}</span>
+            <small>{fragment.integrity} restored</small>
             <i aria-hidden="true"></i>
           </button>
+        ))}
+      </div>
 
-          <div class="fragment-wave" aria-hidden="true">
-            <svg viewBox="0 0 280 60" preserveAspectRatio="none">
-              <line x1="0" y1="30" x2="280" y2="30"></line>
-              <polyline points={fragment.waveform}></polyline>
-            </svg>
-            <span></span>
-          </div>
+      <ol class="fragment-list">
+        {fragments.map((fragment, index) => (
+          <li
+            id={`${fragment.id}-panel`}
+            class:list={["fragment-item", `fragment-item--${fragment.number}`, { "is-active": index === 0 }]}
+            data-fragment-item
+            role="tabpanel"
+            hidden={index !== 0}
+          >
+            <div class="fragment-readout">
+              <span>{fragment.time} UTC</span>
+              <span>CHECKSUM / {index === 0 ? "7F2A" : index === 1 ? "91C-" : "--E4"}</span>
+              <span>BUFFER / {fragment.integrity}</span>
+            </div>
 
-          <div class="fragment-detail" id={`${fragment.id}-detail`} data-fragment-detail hidden={index !== 0}>
-            <h3>{fragment.title}</h3>
-            <p>{fragment.body}</p>
-            <code>{fragment.decode}</code>
-          </div>
-        </li>
-      ))}
-    </ol>
+            <div class="fragment-wave" aria-hidden="true">
+              <svg viewBox="0 0 280 92" preserveAspectRatio="none">
+                <line x1="0" y1="46" x2="280" y2="46"></line>
+                <polyline class="fragment-wave__ghost" points={fragment.waveform}></polyline>
+                <polyline class="fragment-wave__primary" points={fragment.waveform}></polyline>
+                <g class="fragment-wave__markers"><circle cx="82" cy="46" r="2"></circle><circle cx="198" cy="46" r="2"></circle></g>
+              </svg>
+              <span class="fragment-wave__scan"></span>
+              <span class="fragment-wave__phase"></span>
+            </div>
+
+            <div class="fragment-detail">
+              <span class="fragment-detail__index">DECODE / {fragment.number}</span>
+              <h3>{fragment.title}</h3>
+              <p>{fragment.body}</p>
+              <code>{fragment.decode}</code>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
   </div>
 </section>
 
@@ -107,34 +136,58 @@ const fragments = [
   .archive-summary dl div { min-height: 3.25rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; border-bottom: 1px solid var(--archive-line); }
   .archive-summary dd { margin: 0; color: var(--archive-text); font: 500 0.68rem/1 var(--archive-mono); text-transform: uppercase; }
   .archive-summary > p { margin: 2rem 0 0; max-width: 19rem; color: var(--archive-muted); font-size: 0.9rem; line-height: 1.6; }
-  .fragment-list { position: relative; list-style: none; margin: 0; padding: 0 0 0 1.75rem; }
-  .fragment-list::before { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 1px; background: linear-gradient(var(--archive-amber), var(--archive-line-strong) 34%, var(--archive-line-strong) 78%, var(--archive-red)); }
-  .fragment-item { position: relative; padding: 0 0 3rem; border-top: 1px solid var(--archive-line-strong); }
-  .fragment-item::before { content: ""; position: absolute; z-index: 2; top: 2.1rem; left: -2rem; width: 0.5rem; height: 0.5rem; border: 1px solid var(--archive-muted); border-radius: 50%; background: var(--archive-surface); }
-  .fragment-item.is-active::before { border-color: var(--archive-amber); background: var(--archive-amber); box-shadow: 0 0 1rem rgba(201, 162, 88, 0.75); }
-  .fragment-item:last-child { border-bottom: 1px solid var(--archive-line-strong); }
-  .fragment-select { width: 100%; min-height: 4.75rem; padding: 0; display: grid; grid-template-columns: 1fr 1fr 1fr auto; gap: 1.5rem; align-items: center; border: 0; background: transparent; color: var(--archive-muted); cursor: pointer; font: 500 0.64rem/1 var(--archive-mono); text-align: left; text-transform: uppercase; }
-  .fragment-select__number { color: var(--archive-text); }
-  .fragment-select i { width: 0.55rem; height: 0.55rem; border: 1px solid currentColor; border-radius: 50%; }
-  .fragment-item.is-active .fragment-select { color: var(--archive-amber); }
-  .fragment-item.is-active .fragment-select__number { color: var(--archive-text); }
-  .fragment-item.is-active .fragment-select i { border-color: var(--archive-amber); background: var(--archive-amber); box-shadow: 0 0 1rem rgba(201, 162, 88, 0.7); }
-  .fragment-wave { position: relative; height: 6rem; overflow: hidden; background: rgba(5, 9, 10, 0.54); border-block: 1px solid var(--archive-line); }
+  .fragment-device { min-width: 0; overflow: hidden; border: 1px solid var(--archive-line-strong); background: rgba(7, 11, 12, 0.72); box-shadow: 0 2rem 5rem rgba(0, 0, 0, 0.22); }
+  .fragment-device__bar { min-height: 5rem; padding: 1.15rem 1.35rem; display: flex; align-items: center; justify-content: space-between; gap: 2rem; border-bottom: 1px solid var(--archive-line); }
+  .fragment-device__bar > div { display: grid; gap: 0.45rem; }
+  .fragment-device__bar strong { font: 500 0.82rem/1 var(--archive-mono); }
+  .fragment-device__state { display: flex; align-items: center; gap: 0.55rem; color: var(--archive-muted); font: 500 0.58rem/1 var(--archive-mono); }
+  .fragment-device__state i { width: 0.4rem; height: 0.4rem; border-radius: 50%; background: var(--archive-amber); box-shadow: 0 0 0.75rem rgba(201, 162, 88, 0.8); }
+  .fragment-tabs { display: grid; grid-template-columns: repeat(3, 1fr); border-bottom: 1px solid var(--archive-line-strong); }
+  .fragment-tabs button { position: relative; min-height: 5.4rem; padding: 1rem 2.4rem 1rem 1.2rem; display: grid; align-content: center; gap: 0.5rem; border: 0; border-right: 1px solid var(--archive-line); background: rgba(255, 255, 255, 0.01); color: var(--archive-muted); cursor: pointer; text-align: left; text-transform: uppercase; }
+  .fragment-tabs button:last-child { border-right: 0; }
+  .fragment-tabs button span { color: var(--archive-text); font: 500 0.73rem/1 var(--archive-mono); }
+  .fragment-tabs button small { font: 400 0.54rem/1 var(--archive-mono); }
+  .fragment-tabs button i { position: absolute; right: 1.15rem; top: 50%; width: 0.45rem; height: 0.45rem; border: 1px solid currentColor; border-radius: 50%; transform: translateY(-50%); }
+  .fragment-tabs button::after { content: ""; position: absolute; left: 0; right: 100%; bottom: -1px; height: 2px; background: var(--archive-amber); transition: right 260ms ease; }
+  .fragment-tabs button:hover, .fragment-tabs button:focus-visible { background: rgba(201, 162, 88, 0.05); color: var(--archive-text); }
+  .fragment-tabs button[aria-selected="true"] { background: rgba(201, 162, 88, 0.09); color: var(--archive-amber); }
+  .fragment-tabs button[aria-selected="true"]::after { right: 0; }
+  .fragment-tabs button[aria-selected="true"] i { border-color: var(--archive-amber); background: var(--archive-amber); box-shadow: 0 0 0.85rem rgba(201, 162, 88, 0.7); }
+  .fragment-list { list-style: none; margin: 0; padding: 0; }
+  .fragment-item { position: relative; min-height: 34rem; }
+  .fragment-readout { min-height: 2.8rem; padding: 0.8rem 1.2rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; border-bottom: 1px solid var(--archive-line); color: var(--archive-muted); font: 400 0.54rem/1 var(--archive-mono); text-transform: uppercase; }
+  .fragment-readout span:nth-child(2) { text-align: center; }
+  .fragment-readout span:last-child { text-align: right; }
+  .fragment-wave { position: relative; height: 11rem; overflow: hidden; background: rgba(5, 9, 10, 0.74); border-bottom: 1px solid var(--archive-line); }
   .fragment-wave::before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(113, 187, 192, 0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(113, 187, 192, 0.08) 1px, transparent 1px); background-size: 2rem 1.5rem; }
   .fragment-wave svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-  .fragment-wave line { stroke: rgba(113, 187, 192, 0.25); stroke-width: 0.8; }
-  .fragment-wave polyline { fill: none; stroke: rgba(113, 187, 192, 0.5); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
-  .fragment-wave span { position: absolute; top: 0; bottom: 0; left: 0; width: 1px; opacity: 0; background: var(--archive-amber); box-shadow: 0 0 1.5rem var(--archive-amber); }
-  .fragment-item.is-active .fragment-wave polyline { stroke: var(--archive-amber); }
-  .fragment-item.is-active .fragment-wave span { opacity: 1; animation: archive-scan 3.8s linear infinite; }
-  .fragment-detail { padding: 2.5rem 0 0 22%; animation: decode-reveal 680ms cubic-bezier(0.2, 0.75, 0.2, 1) both; }
+  .fragment-wave line { stroke: rgba(113, 187, 192, 0.2); stroke-width: 0.7; }
+  .fragment-wave polyline { fill: none; stroke-width: 1.2; vector-effect: non-scaling-stroke; transform-origin: center; }
+  .fragment-wave__primary { stroke: var(--archive-cyan); }
+  .fragment-wave__ghost { opacity: 0.16; stroke: var(--archive-cyan); transform: translateY(10px); }
+  .fragment-wave__markers circle { fill: var(--archive-cyan); opacity: 0.6; }
+  .fragment-wave__scan { position: absolute; top: 0; bottom: 0; left: 0; width: 1px; background: var(--archive-cyan); box-shadow: 0 0 1.5rem var(--archive-cyan); animation: archive-scan 4.8s linear infinite; }
+  .fragment-wave__phase { display: none; }
+  .fragment-item--02 .fragment-wave__primary { stroke: var(--archive-amber); transform: translateY(-8px); }
+  .fragment-item--02 .fragment-wave__ghost { opacity: 0.72; stroke: var(--archive-amber); transform: translate(8px, 12px); }
+  .fragment-item--02 .fragment-wave__markers circle { fill: var(--archive-amber); animation: phase-blink 1.4s ease-in-out infinite alternate; }
+  .fragment-item--02 .fragment-wave__scan { background: var(--archive-amber); box-shadow: 0 0 1.5rem var(--archive-amber); animation-duration: 3.2s; }
+  .fragment-item--02 .fragment-wave__phase { display: block; position: absolute; left: 48%; top: 1rem; bottom: 1rem; width: 8%; border-inline: 1px dashed rgba(201, 162, 88, 0.62); background: rgba(201, 162, 88, 0.06); }
+  .fragment-item--03 .fragment-wave__primary { stroke: var(--archive-red); stroke-dasharray: 7 2 1 4; animation: damaged-trace 1.8s steps(2, end) infinite; }
+  .fragment-item--03 .fragment-wave__ghost { opacity: 0.52; stroke: var(--archive-amber); transform: translate(-5px, 8px); }
+  .fragment-item--03 .fragment-wave__markers circle { fill: var(--archive-red); filter: drop-shadow(0 0 5px var(--archive-red)); }
+  .fragment-item--03 .fragment-wave__scan { width: 3px; background: var(--archive-red); box-shadow: 0 0 1.8rem var(--archive-red); animation: archive-scan 2.2s steps(12, end) infinite; }
+  .fragment-detail { position: relative; padding: 2.6rem 2.75rem 3rem 22%; animation: decode-reveal 680ms cubic-bezier(0.2, 0.75, 0.2, 1) both; }
+  .fragment-detail__index { position: absolute; left: 2.75rem; top: 3rem; color: var(--archive-muted); font: 500 0.58rem/1 var(--archive-mono); }
   .fragment-detail h3 { margin: 0; max-width: 34rem; font: 500 2rem/1.08 var(--archive-display); text-transform: uppercase; }
   .fragment-detail p { max-width: 37rem; margin: 1.4rem 0 1.8rem; color: var(--archive-muted); font-size: 1rem; line-height: 1.65; }
   .fragment-detail code { display: block; padding-left: 1rem; border-left: 2px solid var(--archive-amber); color: var(--archive-amber); font: 500 0.74rem/1.5 var(--archive-mono); }
-  .fragment-item:nth-child(3).is-active .fragment-detail h3 { animation: fragment-glitch 420ms steps(2, end) 1; }
-  @keyframes archive-scan { from { transform: translateX(0); } to { transform: translateX(62rem); } }
+  .fragment-item--03.is-active .fragment-detail h3 { animation: fragment-glitch 420ms steps(2, end) 1; }
+  @keyframes archive-scan { from { left: 0; } to { left: 100%; } }
   @keyframes decode-reveal { from { opacity: 0; clip-path: inset(0 100% 0 0); transform: translateY(0.75rem); } to { opacity: 1; clip-path: inset(0); transform: translateY(0); } }
   @keyframes fragment-glitch { 0%, 100% { transform: none; text-shadow: none; } 25% { transform: translateX(3px); text-shadow: -3px 0 var(--archive-red), 3px 0 var(--archive-cyan); } 55% { transform: translateX(-2px); text-shadow: 2px 0 var(--archive-amber); } 75% { transform: translateX(1px); } }
+  @keyframes phase-blink { to { opacity: 0.18; } }
+  @keyframes damaged-trace { 0%, 88%, 100% { transform: none; } 89% { transform: translate(5px, -3px); } 94% { transform: translate(-3px, 2px); } }
 
   @media (max-width: 900px) {
     .archive-workspace { grid-template-columns: 1fr; gap: 4rem; }
@@ -147,13 +200,15 @@ const fragments = [
     .archive-summary { display: block; }
     .archive-summary__dial { width: 7rem; margin-bottom: 2rem; }
     .archive-summary > p { margin-bottom: 1rem; }
-    .fragment-list { padding-left: 1.25rem; }
-    .fragment-item::before { left: -1.5rem; }
-    .fragment-select { min-height: 6rem; grid-template-columns: 1fr auto; gap: 0.65rem 1rem; }
-    .fragment-select span:nth-child(2), .fragment-select span:nth-child(3) { grid-row: 2; }
-    .fragment-select i { grid-column: 2; grid-row: 1 / 3; }
-    .fragment-wave { height: 5rem; }
-    .fragment-detail { padding-left: 0; }
+    .fragment-device__state { display: none; }
+    .fragment-tabs button { min-height: 4.75rem; padding: 0.8rem; text-align: center; }
+    .fragment-tabs button i { display: none; }
+    .fragment-tabs button small { font-size: 0.48rem; }
+    .fragment-readout { grid-template-columns: 1fr 1fr; }
+    .fragment-readout span:nth-child(2) { display: none; }
+    .fragment-wave { height: 8rem; }
+    .fragment-detail { padding: 2.4rem 1.25rem 2.6rem; }
+    .fragment-detail__index { position: static; display: block; margin-bottom: 1.25rem; }
     .fragment-detail h3 { font-size: 1.55rem; }
   }
 </style>

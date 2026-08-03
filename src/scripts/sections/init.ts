@@ -130,8 +130,48 @@ function setupScope(root: HTMLElement) {
     context.fillRect(scanX - 30, 0, 40, cssHeight);
 
     if (mode === "archive") {
-      context.fillStyle = "rgba(214, 75, 65, 0.8)";
-      context.fillRect(cssWidth * 0.515, 20, 1, cssHeight - 52);
+      const gateCenter = cssWidth * 0.52;
+      const gateWidth = Math.max(46, cssWidth * 0.055);
+      const gatePulse = reduceMotion ? 0.5 : (Math.sin(time * 0.004) + 1) * 0.5;
+      const gateGradient = context.createLinearGradient(gateCenter - gateWidth, 0, gateCenter + gateWidth, 0);
+      gateGradient.addColorStop(0, "rgba(214, 75, 65, 0)");
+      gateGradient.addColorStop(0.45, `rgba(214, 75, 65, ${0.07 + gatePulse * 0.05})`);
+      gateGradient.addColorStop(0.55, `rgba(201, 162, 88, ${0.08 + gatePulse * 0.05})`);
+      gateGradient.addColorStop(1, "rgba(201, 162, 88, 0)");
+      context.fillStyle = gateGradient;
+      context.fillRect(gateCenter - gateWidth, 18, gateWidth * 2, cssHeight - 50);
+
+      context.save();
+      context.setLineDash([4, 7]);
+      context.strokeStyle = "rgba(214, 75, 65, 0.62)";
+      context.lineWidth = 1;
+      for (const edge of [gateCenter - gateWidth * 0.52, gateCenter + gateWidth * 0.52]) {
+        context.beginPath();
+        context.moveTo(edge, 24);
+        context.lineTo(edge, cssHeight - 38);
+        context.stroke();
+      }
+      context.restore();
+
+      const markerY = cssHeight * 0.53;
+      const markerX = gateCenter + Math.sin(time * 0.0028) * gateWidth * 0.32;
+      context.strokeStyle = "rgba(201, 162, 88, 0.82)";
+      context.beginPath();
+      context.moveTo(gateCenter - gateWidth * 0.48, markerY);
+      context.lineTo(gateCenter + gateWidth * 0.48, markerY);
+      context.stroke();
+      context.fillStyle = "rgba(214, 75, 65, 0.95)";
+      context.beginPath();
+      context.moveTo(markerX, markerY - 6);
+      context.lineTo(markerX + 6, markerY);
+      context.lineTo(markerX, markerY + 6);
+      context.lineTo(markerX - 6, markerY);
+      context.closePath();
+      context.fill();
+      context.strokeStyle = `rgba(214, 75, 65, ${0.38 + gatePulse * 0.38})`;
+      context.beginPath();
+      context.arc(markerX, markerY, 11 + gatePulse * 5, 0, Math.PI * 2);
+      context.stroke();
     }
   };
 
@@ -228,14 +268,13 @@ function setupFragments(root: HTMLElement) {
 
   const buttons = [...archive.querySelectorAll<HTMLButtonElement>("[data-fragment-select]")];
   const activate = (button: HTMLButtonElement) => {
+    const panelId = button.getAttribute("aria-controls");
     for (const item of archive.querySelectorAll<HTMLElement>("[data-fragment-item]")) {
-      const itemButton = item.querySelector<HTMLButtonElement>("[data-fragment-select]");
-      const detail = item.querySelector<HTMLElement>("[data-fragment-detail]");
-      const active = itemButton === button;
+      const active = item.id === panelId;
       item.classList.toggle("is-active", active);
-      itemButton?.setAttribute("aria-expanded", String(active));
-      if (detail) detail.hidden = !active;
+      item.hidden = !active;
     }
+    for (const candidate of buttons) candidate.setAttribute("aria-selected", String(candidate === button));
     ScrollTrigger.refresh();
   };
 

@@ -35,9 +35,32 @@
               <stop offset="0.3" stop-color="#c9a258" stop-opacity="0.35"></stop>
               <stop offset="1" stop-color="#c9a258" stop-opacity="0"></stop>
             </radialGradient>
+            <radialGradient id="topo-relief" cx="52%" cy="54%" r="58%">
+              <stop offset="0" stop-color="#71bbc0" stop-opacity="0.13"></stop>
+              <stop offset="0.55" stop-color="#71bbc0" stop-opacity="0.025"></stop>
+              <stop offset="1" stop-color="#071012" stop-opacity="0"></stop>
+            </radialGradient>
+            <radialGradient id="range-field" cx="51.5%" cy="53.6%" r="48%">
+              <stop offset="0" stop-color="#71bbc0" stop-opacity="0.15"></stop>
+              <stop offset="1" stop-color="#071012" stop-opacity="0"></stop>
+            </radialGradient>
+            <linearGradient id="thermal-field" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#071012"></stop>
+              <stop offset="0.55" stop-color="#3a201b" stop-opacity="0.42"></stop>
+              <stop offset="1" stop-color="#071012"></stop>
+            </linearGradient>
+            <pattern id="thermal-scan" width="8" height="8" patternUnits="userSpaceOnUse">
+              <path d="M0 8H8" stroke="#c9a258" stroke-opacity="0.12" stroke-width="1"></path>
+            </pattern>
           </defs>
 
           <rect class="map-grid" width="800" height="800" fill="url(#sector-grid-large)"></rect>
+          <g class="map-mode-surface" aria-hidden="true">
+            <rect class="map-mode-surface--topo" width="800" height="800" fill="url(#topo-relief)"></rect>
+            <rect class="map-mode-surface--range" width="800" height="800" fill="url(#range-field)"></rect>
+            <rect class="map-mode-surface--thermal" width="800" height="800" fill="url(#thermal-field)"></rect>
+            <rect class="map-mode-surface--thermal" width="800" height="800" fill="url(#thermal-scan)"></rect>
+          </g>
 
           <g class="map-layer map-layer--topo">
             <path d="M52 536C106 466 128 380 187 320C249 256 328 248 388 185C448 123 541 104 619 155C702 208 756 306 725 395C698 473 630 505 590 574C548 647 470 725 373 708C289 694 265 627 194 605C132 585 83 578 52 536Z"></path>
@@ -47,9 +70,10 @@
           </g>
 
           <g class="map-layer map-layer--range">
-            <circle cx="412" cy="429" r="78"></circle><circle cx="412" cy="429" r="162"></circle><circle cx="412" cy="429" r="254"></circle>
+            <circle cx="412" cy="429" r="42"></circle><circle cx="412" cy="429" r="78"></circle><circle cx="412" cy="429" r="162"></circle><circle cx="412" cy="429" r="254"></circle><circle cx="412" cy="429" r="314"></circle>
             <path d="M79 164L412 429L712 132M104 675L412 429L735 660"></path>
             <path class="range-sweep" d="M412 429L412 116A313 313 0 0 1 679 265Z"></path>
+            <path class="range-ticks" d="M412 101V124M412 734V757M84 429H107M717 429H740M180 197L197 214M627 644L644 661M180 661L197 644M627 214L644 197"></path>
           </g>
 
           <g class="station-plan">
@@ -60,6 +84,7 @@
 
           <g class="map-layer map-layer--thermal">
             <circle cx="412" cy="429" r="150" fill="url(#thermal-halo)"></circle>
+            <path class="thermal-track" d="M526 382C497 398 478 418 452 440S444 470 431 486"></path>
             <circle class="thermal-contact thermal-contact--one" cx="452" cy="440" r="9"></circle>
             <circle class="thermal-contact thermal-contact--two" cx="476" cy="468" r="7"></circle>
             <circle class="thermal-contact thermal-contact--three" cx="431" cy="486" r="6"></circle>
@@ -97,8 +122,9 @@
       </dl>
 
       <aside class="location-anomaly">
-        <span>THERMAL / 03</span>
+        <div class="location-anomaly__head"><span>CONTACT ASSESSMENT</span><strong><i></i>THERMAL / 03</strong></div>
         <p>Three transient contacts crossed the sealed service ring. No exterior approach was recorded.</p>
+        <div class="location-anomaly__foot"><span>PERIMETER / SEALED</span><span>EVENT / INTERNAL</span></div>
       </aside>
     </div>
   </div>
@@ -109,17 +135,21 @@
   .location-section__heading { margin-bottom: 6rem; }
   .location-section__heading em { color: var(--archive-red); font-style: normal; }
   .location-workspace { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(20rem, 0.65fr); gap: 6rem; align-items: center; }
-  .sector-map { min-width: 0; border: 1px solid var(--archive-line-strong); background: #080d0f; }
+  .sector-map { width: min(100%, 62rem); min-width: 0; justify-self: center; border: 1px solid var(--archive-line-strong); background: #080d0f; }
   .sector-map__bar { min-height: 5rem; }
-  .sector-map__screen { position: relative; aspect-ratio: 1; overflow: hidden; background: radial-gradient(circle at 52% 54%, rgba(113, 187, 192, 0.08), transparent 38%), #070b0d; }
-  .sector-map svg { width: 100%; height: 100%; color: rgba(113, 187, 192, 0.12); }
-  .map-layer, .station-plan, .map-origin, .map-callouts { transition: opacity 420ms ease; }
-  .map-layer--topo path { fill: none; stroke: rgba(113, 187, 192, 0.42); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+  .sector-map__screen { position: relative; aspect-ratio: 1; overflow: hidden; background: #070b0d; transition: background-color 420ms ease; }
+  .sector-map svg { width: 100%; height: 100%; transform: scale(0.93); transform-origin: center; color: rgba(113, 187, 192, 0.12); }
+  .map-layer, .station-plan, .map-origin, .map-callouts, .map-mode-surface rect { transition: opacity 420ms ease; }
+  .map-mode-surface--range, .map-mode-surface--thermal { opacity: 0; }
+  .map-layer--topo path { fill: rgba(113, 187, 192, 0.018); stroke: rgba(113, 187, 192, 0.48); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
+  .map-layer--topo path:nth-child(even) { fill: rgba(113, 187, 192, 0.032); }
   .map-layer--range { opacity: 0.18; }
   .map-layer--range circle, .map-layer--range > path:first-of-type { fill: none; stroke: rgba(113, 187, 192, 0.58); stroke-width: 1.2; vector-effect: non-scaling-stroke; }
-  .range-sweep { fill: rgba(113, 187, 192, 0.08); stroke: rgba(113, 187, 192, 0.25); transform-origin: 412px 429px; }
+  .range-sweep { fill: rgba(113, 187, 192, 0.1); stroke: rgba(113, 187, 192, 0.32); transform-origin: 412px 429px; }
+  .range-ticks { fill: none !important; stroke: rgba(216, 224, 224, 0.72) !important; }
   .station-plan path, .station-plan rect { fill: rgba(113, 187, 192, 0.08); stroke: rgba(216, 224, 224, 0.75); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
   .map-layer--thermal { opacity: 0; }
+  .thermal-track { fill: none !important; stroke: rgba(201, 162, 88, 0.74) !important; stroke-width: 2; stroke-dasharray: 5 7; vector-effect: non-scaling-stroke; animation: thermal-track 2.8s linear infinite; }
   .thermal-contact { fill: var(--archive-red); filter: drop-shadow(0 0 12px rgba(214, 75, 65, 0.9)); animation: thermal-flicker 2.4s steps(1) infinite; }
   .thermal-contact--two { animation-delay: 0.6s; }.thermal-contact--three { animation-delay: 1.1s; }
   .map-origin circle, .map-origin path { fill: none; stroke: var(--archive-red); stroke-width: 1.4; vector-effect: non-scaling-stroke; }
@@ -128,25 +158,37 @@
   .map-callouts text { fill: rgba(216, 224, 224, 0.65); font: 500 11px var(--archive-mono); }
   [data-map-mode="range"] .map-layer--topo { opacity: 0.15; }
   [data-map-mode="range"] .map-layer--range { opacity: 1; }
+  [data-map-mode="range"] .map-mode-surface--topo { opacity: 0; }
+  [data-map-mode="range"] .map-mode-surface--range { opacity: 1; }
+  [data-map-mode="range"] .station-plan { opacity: 0.52; }
   [data-map-mode="range"] .range-sweep { animation: range-rotate 5.5s linear infinite; }
   [data-map-mode="thermal"] .map-layer--topo, [data-map-mode="thermal"] .map-layer--range { opacity: 0.12; }
   [data-map-mode="thermal"] .map-layer--thermal { opacity: 1; }
+  [data-map-mode="thermal"] .map-mode-surface--topo { opacity: 0; }
+  [data-map-mode="thermal"] .map-mode-surface--thermal { opacity: 1; }
+  [data-map-mode="thermal"] .map-grid { opacity: 0.34; }
+  [data-map-mode="thermal"] .map-origin circle, [data-map-mode="thermal"] .map-origin path { stroke: var(--archive-amber); }
   .sector-map__coordinates { position: absolute; left: 1.25rem; bottom: 1.25rem; display: flex; gap: 1.25rem; color: var(--archive-muted); font: 400 0.58rem/1 var(--archive-mono); }
   .sector-map__legend { position: absolute; right: 1.25rem; bottom: 1.25rem; color: var(--archive-cyan); font: 500 0.58rem/1 var(--archive-mono); text-transform: uppercase; }
-  .location-copy h3 { margin: 1.5rem 0 4rem; font: 450 clamp(2.65rem, 3vw, 3.4rem)/1.08 var(--archive-mono); }
+  .location-copy h3 { margin: 1.5rem 0 3.5rem; font: 450 clamp(3rem, 3.55vw, 4rem)/1.04 var(--archive-mono); }
   .location-copy h3 span { white-space: nowrap; }
   .location-copy dl { margin: 0; border-top: 1px solid var(--archive-line-strong); }
   .location-copy dl div { min-height: 3.75rem; display: flex; justify-content: space-between; align-items: center; gap: 1rem; border-bottom: 1px solid var(--archive-line); }
   .location-copy dd { margin: 0; font: 500 0.72rem/1 var(--archive-mono); text-transform: uppercase; }
   .location-copy dd[data-alert] { color: var(--archive-red); }
-  .location-anomaly { margin-top: 3.5rem; padding: 1.25rem 0 0 1.25rem; border-top: 1px solid var(--archive-red); border-left: 1px solid var(--archive-red); }
-  .location-anomaly span { color: var(--archive-red); font: 500 0.65rem/1 var(--archive-mono); }
-  .location-anomaly p { max-width: 25rem; margin: 1rem 0 0; color: var(--archive-muted); font-size: 0.95rem; line-height: 1.6; }
+  .location-anomaly { margin-top: 3.5rem; border: 1px solid rgba(214, 75, 65, 0.5); background: linear-gradient(135deg, rgba(214, 75, 65, 0.09), rgba(7, 9, 11, 0.22) 62%); }
+  .location-anomaly__head, .location-anomaly__foot { min-height: 2.75rem; padding: 0.75rem 1rem; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 1.5rem; border-bottom: 1px solid rgba(214, 75, 65, 0.25); color: var(--archive-muted); font: 500 0.54rem/1 var(--archive-mono); }
+  .location-anomaly__head strong { display: flex; align-items: center; gap: 0.5rem; color: var(--archive-red); font-weight: 500; }
+  .location-anomaly__head i { width: 0.42rem; height: 0.42rem; border-radius: 50%; background: var(--archive-red); box-shadow: 0 0 0.75rem rgba(214, 75, 65, 0.85); }
+  .location-anomaly p { max-width: 26rem; margin: 0; padding: 1.35rem 1rem 1.5rem; color: var(--archive-text); font-size: 0.96rem; line-height: 1.6; }
+  .location-anomaly__foot { min-height: 2.4rem; border-top: 1px solid rgba(214, 75, 65, 0.18); border-bottom: 0; color: var(--archive-muted); }
   @keyframes range-rotate { to { transform: rotate(360deg); } }
   @keyframes thermal-flicker { 0%, 76%, 100% { opacity: 0.9; } 77%, 83% { opacity: 0.2; } 84%, 91% { opacity: 0.65; } }
+  @keyframes thermal-track { to { stroke-dashoffset: -36; } }
 
   @media (max-width: 1050px) {
     .location-workspace { grid-template-columns: 1fr; gap: 4rem; }
+    .sector-map { width: 100%; }
     .location-copy { display: grid; grid-template-columns: 1fr 1fr; gap: 0 3rem; }
     .location-copy > p, .location-copy h3 { grid-column: 1 / -1; }
     .location-copy h3 { font-size: 3.25rem; }
