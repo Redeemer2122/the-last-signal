@@ -14,22 +14,23 @@ function setupReveals(root: HTMLElement) {
   if (reduceMotion) return;
 
   const context = gsap.context(() => {
-    for (const section of root.querySelectorAll<HTMLElement>("[data-archive-section]")) {
-      const targets = [...section.querySelectorAll<HTMLElement>("[data-reveal]")];
-      if (!targets.length) continue;
+    for (const target of root.querySelectorAll<HTMLElement>("[data-reveal]")) {
+      const rowDelay = target.parentElement?.classList.contains("signal-list")
+        ? [...target.parentElement.children].indexOf(target) * 0.035
+        : 0;
 
-      gsap.fromTo(targets, {
+      gsap.fromTo(target, {
         autoAlpha: 0,
-        y: 28,
+        y: target.classList.contains("section-heading") ? 20 : 28,
       }, {
         autoAlpha: 1,
         y: 0,
         duration: 0.9,
-        stagger: 0.1,
+        delay: rowDelay,
         ease: "power2.out",
         scrollTrigger: {
-          trigger: section,
-          start: "top 78%",
+          trigger: target,
+          start: "top 88%",
           once: true,
         },
       });
@@ -56,6 +57,72 @@ function setupReveals(root: HTMLElement) {
   }, root);
 
   cleanups.push(() => context.revert());
+}
+
+function setupSectionAccents(root: HTMLElement) {
+  if (reduceMotion) return;
+
+  const scopeScreen = root.querySelector<HTMLElement>(".scope-screen");
+  const location = root.querySelector<HTMLElement>("[data-archive-section='location']");
+  const final = root.querySelector<HTMLElement>("[data-archive-section='final']");
+  const media = gsap.matchMedia();
+  const context = gsap.context(() => {
+    if (scopeScreen) {
+      gsap.fromTo(scopeScreen, {
+        clipPath: "inset(0 50% 0 50%)",
+      }, {
+        clipPath: "inset(0 0% 0 0%)",
+        duration: 1.05,
+        ease: "power2.out",
+        scrollTrigger: {
+          trigger: scopeScreen,
+          start: "top 86%",
+          once: true,
+        },
+      });
+    }
+
+    media.add("(min-width: 768px)", () => {
+      if (location) {
+        ScrollTrigger.create({
+          trigger: location,
+          start: "top bottom",
+          end: "bottom top",
+          onUpdate: ({ progress }) => {
+            const depth = progress - 0.5;
+            location.style.setProperty("--map-y", `${(depth * 8).toFixed(2)}px`);
+            location.style.setProperty("--map-grid-y", `${(depth * 5).toFixed(2)}px`);
+            location.style.setProperty("--map-scale", (0.93 + progress * 0.014).toFixed(4));
+          },
+        });
+      }
+
+      if (final) {
+        ScrollTrigger.create({
+          trigger: final,
+          start: "top bottom",
+          end: "bottom top",
+          onUpdate: ({ progress }) => {
+            const depth = progress - 0.5;
+            final.style.setProperty("--final-image-y", `${(depth * 18).toFixed(2)}px`);
+            final.style.setProperty("--final-image-scale", (1.035 + progress * 0.015).toFixed(4));
+          },
+        });
+      }
+
+      return () => {
+        for (const property of ["--map-y", "--map-grid-y", "--map-scale"]) location?.style.removeProperty(property);
+        for (const property of ["--final-image-y", "--final-image-scale"]) final?.style.removeProperty(property);
+      };
+    });
+  }, root);
+
+  cleanups.push(() => {
+    media.revert();
+    context.revert();
+    for (const property of ["--map-y", "--map-grid-y", "--map-scale"]) location?.style.removeProperty(property);
+    for (const property of ["--final-image-y", "--final-image-scale"]) final?.style.removeProperty(property);
+  });
 }
 
 function setupScope(root: HTMLElement) {
@@ -342,10 +409,12 @@ function setupFinalSignal(root: HTMLElement) {
     const bounds = section.getBoundingClientRect();
     const x = ((event.clientX - bounds.left) / bounds.width - 0.5) * 18;
     const y = ((event.clientY - bounds.top) / bounds.height - 0.5) * 18;
-    instrument.style.transform = `translate(-50%, -50%) translate(${x.toFixed(2)}px, ${y.toFixed(2)}px)`;
+    instrument.style.setProperty("--pointer-x", `${x.toFixed(2)}px`);
+    instrument.style.setProperty("--pointer-y", `${y.toFixed(2)}px`);
   };
   const pointerLeave = () => {
-    if (instrument) instrument.style.transform = "translate(-50%, -50%)";
+    instrument?.style.removeProperty("--pointer-x");
+    instrument?.style.removeProperty("--pointer-y");
   };
   section.addEventListener("pointermove", pointerMove, { passive: true });
   section.addEventListener("pointerleave", pointerLeave);
@@ -360,6 +429,7 @@ function setupFinalSignal(root: HTMLElement) {
 const root = document.querySelector<HTMLElement>("[data-post-sequence]");
 if (root) {
   setupReveals(root);
+  setupSectionAccents(root);
   setupScope(root);
   setupFragments(root);
   setupMap(root);

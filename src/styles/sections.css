@@ -44,7 +44,7 @@
   display: flex;
   justify-content: space-between;
   color: var(--archive-muted);
-  font: 500 0.62rem/1 var(--archive-mono);
+  font: 500 0.68rem/1 var(--archive-mono);
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -52,13 +52,13 @@
 .section-heading { max-width: 76rem; }
 .section-heading .eyebrow { margin: 0 0 1.5rem; color: var(--archive-cyan); }
 .section-heading h2 { margin: 0; font: 470 5.25rem/0.96 var(--archive-display); letter-spacing: 0; text-transform: uppercase; }
-.section-lede { max-width: 39rem; margin: 2rem 0 0; color: var(--archive-muted); font-size: 1.05rem; line-height: 1.65; }
+.section-lede { max-width: 39rem; margin: 2rem 0 0; color: var(--archive-muted); font-size: 1.1rem; line-height: 1.65; }
 
 .post-sequence .eyebrow,
 .post-sequence .instrument-label,
 .post-sequence dt {
   color: var(--archive-muted);
-  font: 500 0.64rem/1.4 var(--archive-mono);
+  font: 500 0.68rem/1.4 var(--archive-mono);
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -95,7 +95,7 @@
   background: transparent;
   color: var(--archive-muted);
   cursor: pointer;
-  font: 500 0.6rem/1 var(--archive-mono);
+  font: 500 0.64rem/1 var(--archive-mono);
   letter-spacing: 0;
   text-transform: uppercase;
 }
@@ -112,7 +112,7 @@
 @media (max-width: 767px) {
   .section-band { min-height: auto; padding: 7rem var(--page-pad); }
   .section-heading h2 { font-size: 2.75rem; line-height: 0.98; }
-  .section-lede { font-size: 0.98rem; }
+  .section-lede { font-size: 1rem; }
   .mode-switch { width: 100%; grid-auto-columns: 1fr; }
   .mode-switch button { min-width: 0; }
 }
