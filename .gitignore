@@ -3,5 +3,6 @@ dist/
 .astro/
 output/
 .playwright-cli/
+/source-assets/style references/
 .DS_Store
 *.log
