@@ -1,13 +1,16 @@
-import type { SequencePreloader } from "./preloader";
+import type { FrameResource, SequencePreloader } from "./preloader";
 
 export class CanvasSequenceRenderer {
   private context: CanvasRenderingContext2D;
-  private poster?: HTMLImageElement;
+  private poster?: FrameResource;
   private requestedFrame = 1;
-  private renderedFrame = 0;
+  private displayedFrame = -1;
   private raf = 0;
 
-  constructor(private canvas: HTMLCanvasElement, private preloader: SequencePreloader) {
+  constructor(
+    private canvas: HTMLCanvasElement,
+    private preloader: SequencePreloader,
+  ) {
     const context = canvas.getContext("2d", { alpha: false });
     if (!context) throw new Error("Canvas 2D context is unavailable");
     this.context = context;
@@ -21,7 +24,9 @@ export class CanvasSequenceRenderer {
       image.onload = () => resolve();
       image.onerror = () => resolve();
     });
-    if (image.complete && image.naturalWidth) this.poster = image;
+    if (image.complete && image.naturalWidth) {
+      this.poster = { source: image, width: image.naturalWidth, height: image.naturalHeight };
+    }
   }
 
   resize = () => {
@@ -33,35 +38,52 @@ export class CanvasSequenceRenderer {
     if (this.canvas.width !== backingWidth || this.canvas.height !== backingHeight) {
       this.canvas.width = backingWidth;
       this.canvas.height = backingHeight;
-      this.renderedFrame = 0;
+      this.displayedFrame = -1;
       this.request(this.requestedFrame);
     }
   };
 
   request(frame: number) {
-    this.requestedFrame = Math.round(frame);
-    if (this.raf) return;
-    this.raf = requestAnimationFrame(() => {
-      this.raf = 0;
-      if (this.renderedFrame === this.requestedFrame) return;
-      const image = this.preloader.get(this.requestedFrame) ?? this.preloader.getNearest(this.requestedFrame) ?? this.poster;
-      if (image) {
-        this.drawCover(image);
-        this.renderedFrame = this.requestedFrame;
-      }
-    });
+    const requested = Math.round(frame);
+    const changed = requested !== this.requestedFrame;
+    this.requestedFrame = requested;
+    this.canvas.dataset.requestedFrame = String(requested);
+    if (changed || !this.preloader.getCandidate(requested)?.exact) {
+      this.preloader.prioritize(requested);
+    }
+    this.scheduleRender();
   }
 
   destroy() {
     cancelAnimationFrame(this.raf);
   }
 
-  private drawCover(image: CanvasImageSource & { width: number; height: number }) {
+  private scheduleRender() {
+    if (this.raf) return;
+    this.raf = requestAnimationFrame(() => {
+      this.raf = 0;
+      const candidate = this.preloader.getCandidate(this.requestedFrame);
+      if (candidate) {
+        if (candidate.frameIndex === this.displayedFrame) return;
+        this.drawCover(candidate.resource);
+        this.displayedFrame = candidate.frameIndex;
+        this.canvas.dataset.displayedFrame = String(candidate.frameIndex);
+        return;
+      }
+      if (this.poster && this.displayedFrame !== 0) {
+        this.drawCover(this.poster);
+        this.displayedFrame = 0;
+        this.canvas.dataset.displayedFrame = "poster";
+      }
+    });
+  }
+
+  private drawCover(resource: FrameResource) {
     const canvasWidth = this.canvas.width;
     const canvasHeight = this.canvas.height;
-    const scale = Math.max(canvasWidth / image.width, canvasHeight / image.height);
-    const width = image.width * scale;
-    const height = image.height * scale;
-    this.context.drawImage(image, (canvasWidth - width) / 2, (canvasHeight - height) / 2, width, height);
+    const scale = Math.max(canvasWidth / resource.width, canvasHeight / resource.height);
+    const width = resource.width * scale;
+    const height = resource.height * scale;
+    this.context.drawImage(resource.source, (canvasWidth - width) / 2, (canvasHeight - height) / 2, width, height);
   }
 }

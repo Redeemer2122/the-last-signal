@@ -17,6 +17,7 @@ export interface SequenceChapter {
 
 export interface SequenceManifest {
   version: number;
+  cacheKey: string;
   frameCount: number;
   samplingFps: number;
   desktop: SequenceVariant;

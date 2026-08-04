@@ -38,7 +38,19 @@ export const NARRATIVE_CHAPTERS = [
 
 export const SEQUENCE_CONFIG = {
   manifestUrl: "/sequences/the-last-signal/manifest.json",
-  initialFrameCount: 18,
-  preloadConcurrency: 8,
   mobileQuery: "(max-width: 767px)",
+  desktop: {
+    initialFrameCount: 30,
+    preloadConcurrency: 8,
+    cacheSize: 120,
+    behindWindow: 18,
+    aheadWindow: 54,
+  },
+  mobile: {
+    initialFrameCount: 20,
+    preloadConcurrency: 5,
+    cacheSize: 72,
+    behindWindow: 12,
+    aheadWindow: 30,
+  },
 } as const;

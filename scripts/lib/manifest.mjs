@@ -1,4 +1,5 @@
 export const SEQUENCE_ID = "the-last-signal";
+export const SEQUENCE_CACHE_KEY = "sequence-v2-20260804";
 export const SAMPLE_FPS = 24;
 export const TRANSITION_04_START = 24;
 export const MASTER_DURATION = 32;
@@ -52,6 +53,7 @@ export function buildChapters(frameCount) {
 export function buildManifest(frameCount) {
   return {
     version: 1,
+    cacheKey: SEQUENCE_CACHE_KEY,
     frameCount,
     samplingFps: SAMPLE_FPS,
     desktop: { path: "/sequences/the-last-signal/desktop/frame-{frame}.webp", width: 1920, height: 1080 },
