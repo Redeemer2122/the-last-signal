@@ -1,6 +1,7 @@
 export const SEQUENCE_ID = "the-last-signal";
 export const SEQUENCE_CACHE_KEY = "sequence-v2-20260804";
-export const FRAME_PACK_COUNT = 4;
+export const SEQUENCE_CDN_COMMIT = "eab486fdda6d524e772071791bf2429be65784e2";
+export const SEQUENCE_CDN_BASE = `https://cdn.jsdelivr.net/gh/Redeemer2122/the-last-signal@${SEQUENCE_CDN_COMMIT}/public/sequences/${SEQUENCE_ID}`;
 export const SAMPLE_FPS = 24;
 export const TRANSITION_04_START = 24;
 export const MASTER_DURATION = 32;
@@ -58,16 +59,12 @@ export function buildManifest(frameCount) {
     frameCount,
     samplingFps: SAMPLE_FPS,
     desktop: {
-      path: "/sequences/the-last-signal/desktop/frame-{frame}.webp",
-      packPath: "/sequences/the-last-signal/packs/desktop/pack-{pack}.tlsp",
-      packCount: FRAME_PACK_COUNT,
+      path: `${SEQUENCE_CDN_BASE}/desktop/frame-{frame}.webp`,
       width: 1920,
       height: 1080,
     },
     mobile: {
-      path: "/sequences/the-last-signal/mobile/frame-{frame}.webp",
-      packPath: "/sequences/the-last-signal/packs/mobile/pack-{pack}.tlsp",
-      packCount: FRAME_PACK_COUNT,
+      path: `${SEQUENCE_CDN_BASE}/mobile/frame-{frame}.webp`,
       width: 1080,
       height: 1350,
     },

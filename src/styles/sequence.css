@@ -93,7 +93,11 @@
   margin: 0 0 2.8rem; text-align: center;
   font: 500 clamp(1.25rem, 3vw, 1.7rem)/1 var(--sans); letter-spacing: 0; text-transform: uppercase;
 }
-.sequence-loader__status { display: flex; justify-content: space-between; gap: 1rem; color: rgba(23, 25, 26, 0.62); }
+.sequence-loader__status {
+  display: grid; grid-template-columns: 1fr auto; gap: 0.55rem 1rem;
+  color: rgba(23, 25, 26, 0.62);
+}
+.sequence-loader__status span:first-child { grid-row: 1 / span 2; align-self: center; }
 .sequence-loader__track { height: 1px; margin-top: 0.85rem; overflow: hidden; background: rgba(23, 25, 26, 0.15); }
 .sequence-loader__track i {
   display: block; width: var(--loader-progress); height: 100%; background: #17191a;

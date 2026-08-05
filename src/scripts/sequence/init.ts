@@ -9,6 +9,7 @@ import type { SequenceManifest } from "./types";
 async function initialize(stage: HTMLElement) {
   const loader = stage.querySelector<HTMLElement>("[data-sequence-loader]");
   const loaderCount = stage.querySelector<HTMLElement>("[data-loader-count]");
+  const loaderNetwork = stage.querySelector<HTMLElement>("[data-loader-network]");
   const viewport = stage.querySelector<HTMLElement>("[data-sequence-viewport]");
   const canvas = stage.querySelector<HTMLCanvasElement>("canvas");
   const capability = detectCapabilities();
@@ -36,13 +37,17 @@ async function initialize(stage: HTMLElement) {
   const poster = mobile ? manifest.poster.mobile : manifest.poster.desktop;
   const preloader = new SequencePreloader(variant, manifest.frameCount, {
     cacheKey: manifest.cacheKey,
+    concurrency: mobile ? SEQUENCE_CONFIG.mobileConcurrency : SEQUENCE_CONFIG.desktopConcurrency,
     retryAttempts: SEQUENCE_CONFIG.retryAttempts,
   });
   const renderer = new CanvasSequenceRenderer(canvas, preloader);
   let currentFrame = 1;
 
   if (loaderCount) {
-    loaderCount.textContent = `000 / ${String(manifest.frameCount).padStart(3, "0")}`;
+    loaderCount.textContent = `DECODE 000 / ${String(manifest.frameCount).padStart(3, "0")}`;
+  }
+  if (loaderNetwork) {
+    loaderNetwork.textContent = "NETWORK 000%";
   }
 
   await renderer.setPoster(poster);
@@ -55,16 +60,19 @@ async function initialize(stage: HTMLElement) {
     const percentage = Math.min(100, transferRatio * 80 + decodeRatio * 20);
     loader?.style.setProperty("--loader-progress", `${percentage}%`);
   };
-  const removeTransferProgress = preloader.onTransfer((loadedBytes, totalBytes) => {
-    transferRatio = totalBytes > 0 ? loadedBytes / totalBytes : 0;
+  const removeTransferProgress = preloader.onTransfer((loaded, total) => {
+    transferRatio = total > 0 ? loaded / total : 0;
     updateLoaderProgress();
+    if (loaderNetwork) {
+      loaderNetwork.textContent = `NETWORK ${String(Math.round(transferRatio * 100)).padStart(3, "0")}%`;
+    }
   });
   const removeProgress = preloader.onProgress((loaded, failed) => {
     const complete = loaded + failed;
     decodeRatio = complete / manifest.frameCount;
     updateLoaderProgress();
     if (loaderCount) {
-      loaderCount.textContent = `${String(complete).padStart(3, "0")} / ${String(manifest.frameCount).padStart(3, "0")}`;
+      loaderCount.textContent = `DECODE ${String(complete).padStart(3, "0")} / ${String(manifest.frameCount).padStart(3, "0")}`;
     }
     if (loader) {
       loader.setAttribute("aria-label", `${loaded} of ${manifest.frameCount} sequence frames loaded${failed ? `, ${failed} failed` : ""}`);

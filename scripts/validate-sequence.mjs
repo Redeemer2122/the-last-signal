@@ -1,7 +1,6 @@
-import { readFile, readdir, stat } from "node:fs/promises";
+import { readdir, stat } from "node:fs/promises";
 import path from "node:path";
 import { assertFfmpeg, probeJson, run } from "./lib/ffmpeg.mjs";
-import { parseFramePack } from "./lib/frame-packs.mjs";
 import { directorySize, fileExists, formatBytes, fromRoot } from "./lib/filesystem.mjs";
 import { SEQUENCE_ID } from "./lib/manifest.mjs";
 
@@ -36,39 +35,6 @@ async function validateVariant(name, config) {
   return { count: files.length, size: await directorySize(directory) };
 }
 
-async function validatePackVariant(name, config) {
-  const directory = path.join(root, "packs", name);
-  const files = (await readdir(directory)).filter((file) => file.endsWith(".tlsp")).sort();
-  if (files.length !== config.packCount) {
-    throw new Error(`packs/${name}: expected ${config.packCount} packs, found ${files.length}`);
-  }
-
-  let expectedFrame = 1;
-  for (let index = 1; index <= files.length; index += 1) {
-    const expectedName = `pack-${String(index).padStart(3, "0")}.tlsp`;
-    if (files[index - 1] !== expectedName) throw new Error(`packs/${name}: missing ${expectedName}`);
-
-    const pack = await readFile(path.join(directory, expectedName));
-    const parsed = parseFramePack(pack);
-    if (parsed.startFrame !== expectedFrame) {
-      throw new Error(`packs/${name}/${expectedName}: expected start frame ${expectedFrame}, found ${parsed.startFrame}`);
-    }
-
-    for (const entry of parsed.entries) {
-      const sourceName = `frame-${String(entry.frameIndex).padStart(4, "0")}.webp`;
-      const source = await readFile(path.join(root, name, sourceName));
-      const packed = pack.subarray(entry.offset, entry.offset + entry.length);
-      if (!packed.equals(source)) throw new Error(`packs/${name}: ${sourceName} is not byte-identical`);
-      expectedFrame += 1;
-    }
-  }
-
-  if (expectedFrame !== manifest.frameCount + 1) {
-    throw new Error(`packs/${name}: expected ${manifest.frameCount} packed frames, found ${expectedFrame - 1}`);
-  }
-  return { count: expectedFrame - 1, size: await directorySize(directory) };
-}
-
 for (const chapter of manifest.chapters) {
   for (const field of ["frameStart", "frameFocus", "frameEnd"]) {
     if (!Number.isInteger(chapter[field]) || chapter[field] < 1 || chapter[field] > manifest.frameCount) {
@@ -84,9 +50,5 @@ for (const poster of Object.values(manifest.poster)) {
 const desktop = await validateVariant("desktop", manifest.desktop);
 const mobile = await validateVariant("mobile", manifest.mobile);
 if (desktop.count !== mobile.count) throw new Error("Desktop/mobile counts do not match");
-const desktopPacks = await validatePackVariant("desktop", manifest.desktop);
-const mobilePacks = await validatePackVariant("mobile", manifest.mobile);
-
 console.log(`Sequence valid: ${manifest.frameCount} frames at ${manifest.samplingFps} fps.`);
 console.log(`Desktop ${formatBytes(desktop.size)}; mobile ${formatBytes(mobile.size)}.`);
-console.log(`Byte-identical packs: desktop ${formatBytes(desktopPacks.size)}; mobile ${formatBytes(mobilePacks.size)}.`);

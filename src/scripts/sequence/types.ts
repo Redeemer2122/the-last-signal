@@ -1,7 +1,5 @@
 export interface SequenceVariant {
   path: string;
-  packPath: string;
-  packCount: number;
   width: number;
   height: number;
 }
