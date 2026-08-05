@@ -5,11 +5,15 @@
   "samplingFps": 24,
   "desktop": {
     "path": "/sequences/the-last-signal/desktop/frame-{frame}.webp",
+    "packPath": "/sequences/the-last-signal/packs/desktop/pack-{pack}.tlsp",
+    "packCount": 4,
     "width": 1920,
     "height": 1080
   },
   "mobile": {
     "path": "/sequences/the-last-signal/mobile/frame-{frame}.webp",
+    "packPath": "/sequences/the-last-signal/packs/mobile/pack-{pack}.tlsp",
+    "packCount": 4,
     "width": 1080,
     "height": 1350
   },

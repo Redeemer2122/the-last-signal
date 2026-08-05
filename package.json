@@ -9,6 +9,7 @@
     "check": "astro check",
     "video:inspect": "node scripts/inspect-videos.mjs",
     "sequence:build": "node scripts/process-sequence.mjs",
+    "sequence:pack": "node scripts/build-frame-packs.mjs",
     "sequence:validate": "node scripts/validate-sequence.mjs",
     "sequence:all": "npm run video:inspect && npm run sequence:build && npm run sequence:validate"
   },

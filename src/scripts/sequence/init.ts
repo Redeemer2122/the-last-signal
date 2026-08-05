@@ -32,12 +32,10 @@ async function initialize(stage: HTMLElement) {
   }
 
   const mobile = window.matchMedia(SEQUENCE_CONFIG.mobileQuery).matches;
-  const profile = mobile ? SEQUENCE_CONFIG.mobile : SEQUENCE_CONFIG.desktop;
   const variant = mobile ? manifest.mobile : manifest.desktop;
   const poster = mobile ? manifest.poster.mobile : manifest.poster.desktop;
   const preloader = new SequencePreloader(variant, manifest.frameCount, {
     cacheKey: manifest.cacheKey,
-    concurrency: profile.preloadConcurrency,
     retryAttempts: SEQUENCE_CONFIG.retryAttempts,
   });
   const renderer = new CanvasSequenceRenderer(canvas, preloader);
@@ -51,13 +49,24 @@ async function initialize(stage: HTMLElement) {
   renderer.resize();
   renderer.request(1);
 
+  let transferRatio = 0;
+  let decodeRatio = 0;
+  const updateLoaderProgress = () => {
+    const percentage = Math.min(100, transferRatio * 80 + decodeRatio * 20);
+    loader?.style.setProperty("--loader-progress", `${percentage}%`);
+  };
+  const removeTransferProgress = preloader.onTransfer((loadedBytes, totalBytes) => {
+    transferRatio = totalBytes > 0 ? loadedBytes / totalBytes : 0;
+    updateLoaderProgress();
+  });
   const removeProgress = preloader.onProgress((loaded, failed) => {
     const complete = loaded + failed;
+    decodeRatio = complete / manifest.frameCount;
+    updateLoaderProgress();
     if (loaderCount) {
       loaderCount.textContent = `${String(complete).padStart(3, "0")} / ${String(manifest.frameCount).padStart(3, "0")}`;
     }
     if (loader) {
-      loader.style.setProperty("--loader-progress", `${(complete / manifest.frameCount) * 100}%`);
       loader.setAttribute("aria-label", `${loaded} of ${manifest.frameCount} sequence frames loaded${failed ? `, ${failed} failed` : ""}`);
     }
   });
@@ -68,6 +77,7 @@ async function initialize(stage: HTMLElement) {
     stage.dataset.mode = "fallback";
     document.documentElement.classList.remove("sequence-loading");
     if (loader) loader.hidden = true;
+    removeTransferProgress();
     removeProgress();
     renderer.destroy();
     preloader.destroy();
@@ -112,6 +122,7 @@ async function initialize(stage: HTMLElement) {
 
   window.addEventListener("pagehide", () => {
     document.documentElement.classList.remove("sequence-loading");
+    removeTransferProgress();
     removeProgress();
     recall?.removeEventListener("click", recallHandler);
     window.removeEventListener("resize", renderer.resize);

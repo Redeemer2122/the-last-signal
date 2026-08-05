@@ -1,5 +1,6 @@
 export const SEQUENCE_ID = "the-last-signal";
 export const SEQUENCE_CACHE_KEY = "sequence-v2-20260804";
+export const FRAME_PACK_COUNT = 4;
 export const SAMPLE_FPS = 24;
 export const TRANSITION_04_START = 24;
 export const MASTER_DURATION = 32;
@@ -56,8 +57,20 @@ export function buildManifest(frameCount) {
     cacheKey: SEQUENCE_CACHE_KEY,
     frameCount,
     samplingFps: SAMPLE_FPS,
-    desktop: { path: "/sequences/the-last-signal/desktop/frame-{frame}.webp", width: 1920, height: 1080 },
-    mobile: { path: "/sequences/the-last-signal/mobile/frame-{frame}.webp", width: 1080, height: 1350 },
+    desktop: {
+      path: "/sequences/the-last-signal/desktop/frame-{frame}.webp",
+      packPath: "/sequences/the-last-signal/packs/desktop/pack-{pack}.tlsp",
+      packCount: FRAME_PACK_COUNT,
+      width: 1920,
+      height: 1080,
+    },
+    mobile: {
+      path: "/sequences/the-last-signal/mobile/frame-{frame}.webp",
+      packPath: "/sequences/the-last-signal/packs/mobile/pack-{pack}.tlsp",
+      packCount: FRAME_PACK_COUNT,
+      width: 1080,
+      height: 1350,
+    },
     poster: {
       desktop: "/sequences/the-last-signal/posters/poster-desktop.webp",
       mobile: "/sequences/the-last-signal/posters/poster-mobile.webp",

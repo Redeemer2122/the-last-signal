@@ -1294,7 +1294,7 @@ canvas скачком переходит 18 -> 94
 
 | Проект | Media model | Scroll engine | Сильная сторона | Основной риск |
 | --- | --- | --- | --- | --- |
-| The Last Signal | 760 независимых WebP, отдельные desktop/mobile variants | Canvas 2D + GSAP + ScrollTrigger + Lenis | точный кадр, надежный reverse, общая timeline текста и media | много запросов, высокий decoded memory, слабая cold-start очередь |
+| The Last Signal | 760 WebP в четырех byte-identical frame packs на variant | Canvas 2D + GSAP + ScrollTrigger + Lenis | точный кадр, надежный reverse, общая timeline текста и media | высокий decoded memory, обязательный startup preload |
 | WALLOW | 432 WebP 1600 x 900 | собственный RAF scrub + GSAP/Lenis для UI | простой weighted scrub, redraw только при смене index | preload почти всех кадров сразу, нет direction-aware scheduling |
 | Tea Leaf Scroll World | пять MP4 1600 x 900 | Blob video + `currentTime` + RAF lerp | мало media elements, компактная сегментация | полная Blob-загрузка, decoder-dependent seek, crossfade |
 | Scroll World | набор dive/connector MP4 | lazy Blob video + coalesced seek | наиболее зрелая mobile/video обработка | сложнее media pipeline, seek не так детерминирован, seam crossfade |
@@ -1429,28 +1429,15 @@ Scroll World является наиболее полной video-based referenc
 
 The Last Signal использует один из самых надежных способов точной синхронизации:
 
-- 760 независимых frames;
+- 760 исходных WebP, упакованных без перекодирования;
 - отдельные desktop и mobile compositions;
 - единая GSAP timeline для frames и текста;
 - Canvas 2D;
-- poster и nearest-frame fallback;
-- request deduplication;
-- ограниченная concurrency.
+- fullscreen quality-first loader;
+- четыре параллельных pack-запроса;
+- exact-only renderer после startup.
 
-Главная проблема не в Canvas или GSAP, а в порядке загрузки и identity renderer.
-
-Подтвержденный cold-start сценарий production:
-
-```text
-t ~= 1 s: 11 / 760 loaded
-loading продолжается, native scroll уже доступен
-scrollY достигает 700
-active mode начинается на 18 / 760
-timeline требует frame 94
-canvas имеет только стартовый runway 1..18
-```
-
-Дополнительный дефект возникает, если renderer рисует fallback frame 18, но записывает marker как будто нарисован requested frame 94. После загрузки 94 повторный request может быть ошибочно пропущен.
+Главная production-проблема была не в Canvas или GSAP, а в 760 отдельных HTTP-запросах. Frame-pack слой устраняет request latency, не меняя media bytes или renderer contract.
 
 Преимущества The Last Signal, которые следует сохранить:
 
@@ -1512,7 +1499,10 @@ The Last Signal media model
 white fullscreen loader
         |
         v
-bounded preload of every full-resolution WebP
+4 parallel immutable frame-pack requests
+        |
+        v
+extract original WebP bytes and decode 760 Images
         |
         v
 all frames ready -> exact-only canvas renderer
@@ -1530,14 +1520,28 @@ ScrollTrigger timeline -> requestedFrame = displayedFrame
 Практические правила:
 
 - desktop и mobile имеют отдельные последовательности;
-- одновременно работают 8-12 network workers, а не 760 неконтролируемых запросов;
-- каждый неудачный кадр получает ограниченный retry;
+- четыре pack-файла загружаются параллельно;
+- каждый pack получает ограниченный retry;
 - `HTMLImageElement` сохраняются до ухода со страницы;
 - не следует принудительно создавать 760 `ImageBitmap`: их decoded RGBA memory слишком велика;
 - loader закрывает сцену, пока `loaded === frameCount`;
 - при окончательной ошибке загрузки включается semantic fallback, а не размытая sequence.
 
 Three-tier схема `overview -> detail -> high` полезна для маленького framed canvas, но была отвергнута для полноэкранного hero: растяжение atlas-кадров делает AI-видео заметно пиксельным и мягким. Такой fallback нельзя показывать пользователю как финальное изображение.
+
+### 27.4. Byte-identical frame packs
+
+Pack-файл не является atlas и не меняет изображение. Он содержит небольшой binary header, таблицу `frameIndex -> offset/length` и последовательно записанные исходные WebP-байты. Build validator сравнивает каждый извлеченный диапазон с соответствующим `.webp` через byte equality.
+
+```text
+TLSFPK01 header
+frame table: [offset, length] x N
+original frame-0001.webp bytes
+original frame-0002.webp bytes
+...
+```
+
+Четыре pack-файла дают параллельную передачу и ограниченный retry, но сокращают число media requests с 760 до 4. В browser каждый диапазон становится `Blob(type: image/webp)`, загружается в `HTMLImageElement`, после чего temporary object URL освобождается.
 
 ### 27.5. Startup state machine
 
@@ -1599,10 +1603,10 @@ WALLOW-style preload сознательно меняет memory efficiency на 
 
 Пример политики:
 
-| Profile | Concurrency | Startup | Режим |
+| Profile | Network requests | Startup | Режим |
 | --- | ---: | ---: | --- |
-| desktop | 12 | все desktop WebP | exact-only canvas |
-| mobile | 8 | все mobile WebP | exact-only canvas |
+| desktop | 4 packs | все 760 desktop WebP decoded | exact-only canvas |
+| mobile | 4 packs | все 760 mobile WebP decoded | exact-only canvas |
 | Save-Data / weak device | 0 | poster | semantic fallback |
 
 Не следует определять качество только по User-Agent. Runtime measurements надежнее статического device label.
