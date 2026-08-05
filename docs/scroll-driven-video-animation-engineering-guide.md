@@ -1481,9 +1481,9 @@ WebCodecs не является автоматическим улучшение�
 ```text
 The Last Signal media model
 + Scroll World neighborhood/mobile discipline
-+ WALLOW redraw/snap discipline
-+ единый priority scheduler
-+ LRU decoded cache
++ WALLOW quality-first preload and redraw discipline
++ bounded full-sequence network workers
++ browser-managed decoded image cache
 + versioned immutable delivery
 ```
 
@@ -1509,94 +1509,54 @@ The Last Signal media model
 ### 27.2. Поток данных
 
 ```text
-ScrollTrigger timeline
+white fullscreen loader
         |
         v
-requestedFrame + direction + velocity
+bounded preload of every full-resolution WebP
         |
-        +----> priority scheduler ----> fetch/decode workers
-        |                                  |
-        |                                  v
-        +----> renderer <------------ LRU frame cache
-                  |
-                  v
-           displayedFrame
+        v
+all frames ready -> exact-only canvas renderer
+        ^                       |
+        |                       v
+ScrollTrigger timeline -> requestedFrame = displayedFrame
 ```
 
 `requestedFrame` и `displayedFrame` являются разными наблюдаемыми состояниями. Это основной инвариант системы.
 
-### 27.3. Priority scheduler
+### 27.3. Quality-first preload
 
-Scheduler должен владеть всеми network/decode tasks. Пример модели:
+Для The Last Signal выбран тот же принцип, который фактически использует WALLOW: до interactive state загружается вся полноразмерная последовательность выбранного viewport-варианта. Loader показывает честный прогресс, а после его исчезновения renderer никогда не подменяет exact frame уменьшенным preview или соседним кадром.
 
-```ts
-type FrameTask = {
-  frameIndex: number;
-  priority: 0 | 1 | 2 | 3 | 4;
-  distance: number;
-  directionMatch: boolean;
-  enqueuedAt: number;
-};
-```
+Практические правила:
 
-Сортировка:
+- desktop и mobile имеют отдельные последовательности;
+- одновременно работают 8-12 network workers, а не 760 неконтролируемых запросов;
+- каждый неудачный кадр получает ограниченный retry;
+- `HTMLImageElement` сохраняются до ухода со страницы;
+- не следует принудительно создавать 760 `ImageBitmap`: их decoded RGBA memory слишком велика;
+- loader закрывает сцену, пока `loaded === frameCount`;
+- при окончательной ошибке загрузки включается semantic fallback, а не размытая sequence.
 
-1. меньший `priority`;
-2. совпадение с направлением;
-3. меньшая дистанция от target;
-4. более раннее время постановки.
-
-Scheduler обязан:
-
-- дедуплицировать queued и in-flight tasks;
-- повышать priority существующей задачи;
-- соблюдать единый concurrency limit;
-- резервировать хотя бы один worker для urgent requests;
-- очищать завершенные in-flight promises;
-- выполнять ограниченный retry только для актуальных кадров;
-- игнорировать устаревшие background задачи при memory pressure.
-
-### 27.4. Sliding window
-
-Базовый desktop profile:
-
-```text
-startup blocking: 1..30
-forward motion: target-18 .. target+54
-reverse motion: target-54 .. target+18
-idle: target-30 .. target+30
-decoded LRU: 90..140 frames
-```
-
-Базовый mobile profile:
-
-```text
-startup blocking: 1..20
-forward motion: target-12 .. target+30
-reverse motion: target-30 .. target+12
-decoded LRU: 48..80 frames
-```
-
-Это стартовые значения для измерений, а не универсальные константы. При быстром scroll окно может временно стать шире по направлению, но decoded cache не должен расти бесконечно.
+Three-tier схема `overview -> detail -> high` полезна для маленького framed canvas, но была отвергнута для полноэкранного hero: растяжение atlas-кадров делает AI-видео заметно пиксельным и мягким. Такой fallback нельзя показывать пользователю как финальное изображение.
 
 ### 27.5. Startup state machine
 
 ```text
 BOOT
   -> POSTER_READY
-  -> START_WINDOW_LOADING
-  -> INTERACTIVE
-  -> BACKGROUND_FILL
+  -> FULL_RES_SEQUENCE_LOADING
+  -> ALL_FRAMES_READY
+  -> EXACT_ONLY_INTERACTIVE
 ```
 
 Правила:
 
 - poster рисуется до инициализации visual timeline;
-- initial runway содержит последовательные кадры;
-- если пользователь прокрутил во время loading, target получает critical priority;
-- loader исчезает, когда готов start window или небольшое окно вокруг актуального target;
-- timeline может существовать во время loading, чтобы scheduler знал target, но canvas не должен показывать blank state;
-- scroll lock используется только как измеренный короткий fallback, а не как основная архитектура.
+- loader является полноэкранным и временно блокирует scroll;
+- loader исчезает только после готовности всех полноразмерных кадров;
+- timeline, frame mapping и scroll stage не меняются;
+- первый interactive render рисует точный текущий frame;
+- повторный визит ускоряется immutable browser cache.
 
 ### 27.6. Renderer contract
 
@@ -1605,14 +1565,12 @@ Renderer принимает target, но рисует candidate:
 ```ts
 request(frameIndex) {
   state.requestedFrame = frameIndex;
-  scheduler.prioritize(frameIndex, direction, velocity);
-  scheduleRaf();
+  scheduleRender();
 }
 
 render() {
-  const candidate = cache.exact(state.requestedFrame)
-    ?? cache.nearest(state.requestedFrame)
-    ?? posterCandidate;
+  const candidate = fullSequence.exact(state.requestedFrame);
+  if (!candidate) return;
 
   if (candidate.frameIndex === state.displayedFrame) return;
   drawCover(candidate.image);
@@ -1620,21 +1578,13 @@ render() {
 }
 ```
 
-Когда cache сообщает о загрузке exact target, renderer снова планирует RAF. Не следует анимировать opacity между соседними кадровыми images: это создает ghosting и скрывает source defects.
+После startup exact target всегда доступен. Не следует анимировать opacity между соседними images: это создаёт ghosting и скрывает source defects.
 
 ### 27.7. LRU и decoded memory
 
 Один decoded frame 1920 x 1080 RGBA теоретически занимает около 7.9 MB. 760 таких frames могут приблизиться к 6 GB. Compressed transfer size не отражает decoded memory.
 
-LRU должен защищать от eviction:
-
-- poster;
-- текущий displayed frame;
-- exact requested frame;
-- небольшие focus windows;
-- direction window.
-
-Остальные кадры удаляются по least recently used. При `ImageBitmap` вызывается `close()`. При `HTMLImageElement` удаляются все сильные ссылки, включая resolved request records.
+WALLOW-style preload сознательно меняет memory efficiency на гарантированное качество. Сильные ссылки сохраняются на `HTMLImageElement`, а browser сам управляет decoded image cache. Обязателен реальный memory test на целевых устройствах. Если 760 кадров окажутся слишком тяжелыми, следующий безопасный вариант - сократить физическое разрешение исходной mobile sequence или перейти на segmented all-intra video; возвращать видимый low-res atlas не следует.
 
 ### 27.8. Network-aware profile
 
@@ -1649,12 +1599,11 @@ LRU должен защищать от eviction:
 
 Пример политики:
 
-| Profile | Concurrency | Startup | Ahead window | Режим |
-| --- | ---: | ---: | ---: | --- |
-| fast desktop | 8 | 30-36 | 48-60 | full sequence |
-| normal mobile | 4-6 | 18-24 | 24-36 | mobile sequence |
-| slow connection | 3-4 | 12-18 | 16-24 | aggressive LRU |
-| Save-Data / weak device | 0 | poster | 0 | semantic fallback |
+| Profile | Concurrency | Startup | Режим |
+| --- | ---: | ---: | --- |
+| desktop | 12 | все desktop WebP | exact-only canvas |
+| mobile | 8 | все mobile WebP | exact-only canvas |
+| Save-Data / weak device | 0 | poster | semantic fallback |
 
 Не следует определять качество только по User-Agent. Runtime measurements надежнее статического device label.
 

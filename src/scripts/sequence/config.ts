@@ -40,17 +40,10 @@ export const SEQUENCE_CONFIG = {
   manifestUrl: "/sequences/the-last-signal/manifest.json",
   mobileQuery: "(max-width: 767px)",
   desktop: {
-    initialFrameCount: 30,
-    preloadConcurrency: 8,
-    cacheSize: 120,
-    behindWindow: 18,
-    aheadWindow: 54,
+    preloadConcurrency: 12,
   },
   mobile: {
-    initialFrameCount: 20,
-    preloadConcurrency: 5,
-    cacheSize: 72,
-    behindWindow: 12,
-    aheadWindow: 30,
+    preloadConcurrency: 8,
   },
+  retryAttempts: 3,
 } as const;

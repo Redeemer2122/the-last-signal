@@ -76,13 +76,32 @@
 .sequence-chapter--center > p:last-child { margin-inline: auto; }
 
 .sequence-loader {
-  position: absolute; z-index: 10; left: 50%; bottom: 4.2rem; width: min(24rem, calc(100% - 2.5rem));
-  display: grid; grid-template-columns: 1fr auto; gap: 0.8rem; transform: translateX(-50%);
-  color: rgba(232, 238, 243, 0.75); font: 600 0.62rem/1 var(--mono); letter-spacing: 0.13em;
-  transition: opacity 500ms ease, visibility 500ms;
+  --loader-progress: 0%;
+  position: fixed; z-index: 100; inset: 0;
+  display: grid; place-items: center; width: 100%; min-height: 100svh; padding: 2rem;
+  color: #17191a; background: #f5f6f3;
+  font: 600 0.62rem/1 var(--mono); letter-spacing: 0.13em;
+  transition: opacity 600ms ease, visibility 600ms;
 }
-.sequence-loader i { grid-column: 1 / -1; height: 1px; background: linear-gradient(90deg, var(--signal-red) 0 22%, var(--line) 22%); }
-.sequence-loader[data-ready="true"] { opacity: 0; visibility: hidden; }
+.sequence-loader__content { width: min(23rem, 100%); }
+.sequence-loader__spinner {
+  display: block; width: 2.4rem; height: 2.4rem; margin: 0 auto 1.6rem;
+  border: 1px solid rgba(23, 25, 26, 0.18); border-top-color: #17191a; border-radius: 50%;
+  animation: sequence-loader-spin 900ms linear infinite;
+}
+.sequence-loader__brand {
+  margin: 0 0 2.8rem; text-align: center;
+  font: 500 clamp(1.25rem, 3vw, 1.7rem)/1 var(--sans); letter-spacing: 0; text-transform: uppercase;
+}
+.sequence-loader__status { display: flex; justify-content: space-between; gap: 1rem; color: rgba(23, 25, 26, 0.62); }
+.sequence-loader__track { height: 1px; margin-top: 0.85rem; overflow: hidden; background: rgba(23, 25, 26, 0.15); }
+.sequence-loader__track i {
+  display: block; width: var(--loader-progress); height: 100%; background: #17191a;
+  transition: width 160ms linear;
+}
+.sequence-loader[data-ready="true"] { opacity: 0; visibility: hidden; pointer-events: none; }
+html.sequence-loading, html.sequence-loading body { overflow: hidden; overscroll-behavior: none; }
+@keyframes sequence-loader-spin { to { transform: rotate(360deg); } }
 
 .sequence-stage[data-mode="active"] .sequence-fallback { visibility: hidden; }
 .sequence-stage[data-mode="fallback"] { height: auto; }
@@ -107,9 +126,10 @@
   .sequence-readout span:not(:first-child) { display: none; }
   .sequence-progress { bottom: 2rem; }
   .sequence-progress span:first-child { display: none; }
-  .sequence-loader { bottom: 3.8rem; }
+  .sequence-loader { padding: 1.5rem; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .noise-overlay { opacity: 0.045; }
+  .sequence-loader__spinner { animation-duration: 1.8s; }
 }

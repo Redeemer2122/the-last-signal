@@ -1,18 +1,10 @@
 import { detectCapabilities } from "./capabilities";
 import { SEQUENCE_CONFIG } from "./config";
 import { createLenis } from "./lenis";
-import { FRAME_PRIORITY, SequencePreloader } from "./preloader";
+import { SequencePreloader } from "./preloader";
 import { CanvasSequenceRenderer } from "./renderer";
 import { createSequenceTimeline } from "./timeline";
 import type { SequenceManifest } from "./types";
-
-function chapterPriority(manifest: SequenceManifest) {
-  const frames = new Set<number>();
-  for (const chapter of manifest.chapters) {
-    for (let offset = -2; offset <= 2; offset += 1) frames.add(chapter.frameFocus + offset);
-  }
-  return [...frames].filter((frame) => frame >= 1 && frame <= manifest.frameCount);
-}
 
 async function initialize(stage: HTMLElement) {
   const loader = stage.querySelector<HTMLElement>("[data-sequence-loader]");
@@ -24,6 +16,8 @@ async function initialize(stage: HTMLElement) {
   stage.dataset.fallbackReason = capability.reason;
   if (!capability.fullMotion || !viewport || !canvas) return;
 
+  document.documentElement.classList.add("sequence-loading");
+
   let manifest: SequenceManifest;
   try {
     const response = await fetch(SEQUENCE_CONFIG.manifestUrl);
@@ -32,6 +26,7 @@ async function initialize(stage: HTMLElement) {
   } catch (error) {
     console.error("Sequence manifest unavailable", error);
     stage.dataset.mode = "fallback";
+    document.documentElement.classList.remove("sequence-loading");
     if (loader) loader.hidden = true;
     return;
   }
@@ -43,22 +38,47 @@ async function initialize(stage: HTMLElement) {
   const preloader = new SequencePreloader(variant, manifest.frameCount, {
     cacheKey: manifest.cacheKey,
     concurrency: profile.preloadConcurrency,
-    cacheSize: profile.cacheSize,
-    behindWindow: profile.behindWindow,
-    aheadWindow: profile.aheadWindow,
+    retryAttempts: SEQUENCE_CONFIG.retryAttempts,
   });
   const renderer = new CanvasSequenceRenderer(canvas, preloader);
   let currentFrame = 1;
+
+  if (loaderCount) {
+    loaderCount.textContent = `000 / ${String(manifest.frameCount).padStart(3, "0")}`;
+  }
 
   await renderer.setPoster(poster);
   renderer.resize();
   renderer.request(1);
 
   const removeProgress = preloader.onProgress((loaded, failed) => {
-    if (loaderCount) loaderCount.textContent = `${String(loaded).padStart(3, "0")} / ${String(manifest.frameCount).padStart(3, "0")}`;
-    if (loader) loader.setAttribute("aria-label", `${loaded} sequence frames loaded${failed ? `, ${failed} failed` : ""}`);
-    renderer.request(currentFrame);
+    const complete = loaded + failed;
+    if (loaderCount) {
+      loaderCount.textContent = `${String(complete).padStart(3, "0")} / ${String(manifest.frameCount).padStart(3, "0")}`;
+    }
+    if (loader) {
+      loader.style.setProperty("--loader-progress", `${(complete / manifest.frameCount) * 100}%`);
+      loader.setAttribute("aria-label", `${loaded} of ${manifest.frameCount} sequence frames loaded${failed ? `, ${failed} failed` : ""}`);
+    }
   });
+
+  const result = await preloader.preloadAll();
+  if (result.failed > 0) {
+    console.error(`Sequence preload failed for ${result.failed} frame(s)`);
+    stage.dataset.mode = "fallback";
+    document.documentElement.classList.remove("sequence-loading");
+    if (loader) loader.hidden = true;
+    removeProgress();
+    renderer.destroy();
+    preloader.destroy();
+    return;
+  }
+
+  renderer.activate();
+  renderer.request(currentFrame);
+  stage.dataset.mode = "active";
+  if (loader) loader.dataset.ready = "true";
+  document.documentElement.classList.remove("sequence-loading");
 
   const lenis = createLenis();
   const destroyTimeline = createSequenceTimeline({
@@ -73,22 +93,6 @@ async function initialize(stage: HTMLElement) {
       if (progress) progress.textContent = `${String(currentFrame).padStart(3, "0")} / ${String(manifest.frameCount).padStart(3, "0")}`;
     },
   });
-
-  await preloader.preloadRange(1, Math.min(profile.initialFrameCount, manifest.frameCount), FRAME_PRIORITY.runway);
-
-  for (let attempt = 0; attempt < 2; attempt += 1) {
-    const target = currentFrame;
-    await preloader.ensureWindow(target, mobile ? 3 : 4, mobile ? 6 : 10);
-    if (Math.abs(currentFrame - target) <= 3) break;
-  }
-
-  stage.dataset.mode = "active";
-  if (loader) loader.dataset.ready = "true";
-  renderer.request(currentFrame);
-
-  const runwayEnd = Math.min(96, manifest.frameCount);
-  void preloader.preloadRange(profile.initialFrameCount + 1, runwayEnd, FRAME_PRIORITY.runway);
-  void preloader.preloadFrames(chapterPriority(manifest), FRAME_PRIORITY.chapter);
 
   const recall = document.querySelector<HTMLElement>("[data-recall-signal]");
   const recallHandler = () => {
@@ -107,6 +111,7 @@ async function initialize(stage: HTMLElement) {
   document.addEventListener("visibilitychange", visibilityHandler);
 
   window.addEventListener("pagehide", () => {
+    document.documentElement.classList.remove("sequence-loading");
     removeProgress();
     recall?.removeEventListener("click", recallHandler);
     window.removeEventListener("resize", renderer.resize);

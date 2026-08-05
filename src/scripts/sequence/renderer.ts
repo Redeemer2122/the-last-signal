@@ -5,6 +5,7 @@ export class CanvasSequenceRenderer {
   private poster?: FrameResource;
   private requestedFrame = 1;
   private displayedFrame = -1;
+  private ready = false;
   private raf = 0;
 
   constructor(
@@ -13,6 +14,8 @@ export class CanvasSequenceRenderer {
   ) {
     const context = canvas.getContext("2d", { alpha: false });
     if (!context) throw new Error("Canvas 2D context is unavailable");
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
     this.context = context;
   }
 
@@ -38,19 +41,22 @@ export class CanvasSequenceRenderer {
     if (this.canvas.width !== backingWidth || this.canvas.height !== backingHeight) {
       this.canvas.width = backingWidth;
       this.canvas.height = backingHeight;
+      this.context.imageSmoothingEnabled = true;
+      this.context.imageSmoothingQuality = "high";
       this.displayedFrame = -1;
       this.request(this.requestedFrame);
     }
   };
 
+  activate() {
+    this.ready = true;
+    this.displayedFrame = -1;
+    this.request(this.requestedFrame);
+  }
+
   request(frame: number) {
-    const requested = Math.round(frame);
-    const changed = requested !== this.requestedFrame;
-    this.requestedFrame = requested;
-    this.canvas.dataset.requestedFrame = String(requested);
-    if (changed || !this.preloader.getCandidate(requested)?.exact) {
-      this.preloader.prioritize(requested);
-    }
+    this.requestedFrame = Math.round(frame);
+    this.canvas.dataset.requestedFrame = String(this.requestedFrame);
     this.scheduleRender();
   }
 
@@ -62,18 +68,22 @@ export class CanvasSequenceRenderer {
     if (this.raf) return;
     this.raf = requestAnimationFrame(() => {
       this.raf = 0;
-      const candidate = this.preloader.getCandidate(this.requestedFrame);
-      if (candidate) {
-        if (candidate.frameIndex === this.displayedFrame) return;
-        this.drawCover(candidate.resource);
-        this.displayedFrame = candidate.frameIndex;
-        this.canvas.dataset.displayedFrame = String(candidate.frameIndex);
+
+      if (this.ready) {
+        const exact = this.preloader.getExact(this.requestedFrame);
+        if (!exact || exact.frameIndex === this.displayedFrame) return;
+        this.drawCover(exact.resource);
+        this.displayedFrame = exact.frameIndex;
+        this.canvas.dataset.displayedFrame = String(exact.frameIndex);
+        this.canvas.dataset.frameSource = "high";
         return;
       }
+
       if (this.poster && this.displayedFrame !== 0) {
         this.drawCover(this.poster);
         this.displayedFrame = 0;
         this.canvas.dataset.displayedFrame = "poster";
+        this.canvas.dataset.frameSource = "poster";
       }
     });
   }
